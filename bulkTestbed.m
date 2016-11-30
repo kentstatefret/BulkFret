@@ -48,8 +48,6 @@ for i=3:size(doubles,2)
     end  
 end
 
-disp('done')
-
 
 
 

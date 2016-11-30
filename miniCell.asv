@@ -1,0 +1,27 @@
+classdef miniCell
+    %MINICELL Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        x
+        y
+        w
+        h
+        fig
+        data
+        backGround
+        graph
+    end
+    
+    methods
+        function cell = create(x,y,w,h,data,fig)
+        cell.x=x
+        cell.y=y
+        cell.w=w
+        cell.data=data
+        cell.fig=fig
+        miniCell.graph=axes('Parent',cell.fig,'position [x,y,h,w])
+    end
+    
+end
+
