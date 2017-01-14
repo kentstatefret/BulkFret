@@ -42,7 +42,7 @@ function bulkFret
     cellTable={'A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12';'B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12';'C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12';'D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12';'E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12';'F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12';'G1','G2','G3','G4','G5','G6','G7','G8','G9','G10','G11','G12';'H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12'};
     cellList={'A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12','B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12','C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','G1','G2','G3','G4','G5','G6','G7','G8','G9','G10','G11','G12','H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12'};
     
-    mainWindow          = figure('Name','Bulk Fret','NumberTitle','off','Visible','on','Position',[25,25,1280,720],'Resize','off');
+    mainWindow          = figure('Name','Bulk Fret','NumberTitle','off','Visible','on','Position',[25,25,1280,720],'SizeChangedFcn',@resizeWindow);
     table               = uitable(mainWindow,'Data',cellTable,'Position',[10,530,332,168],'ColumnWidth',{25,25,25,25,25,25,25,25,25,25,25,25},'CellSelectionCallback',@CellSelection);
     graph               = axes('Units','Pixels','Position',[400,100,800,600],'Parent',mainWindow);
     addToBackgrounds	= uicontrol('Style','pushbutton','String','Add selected cells to background list.','Position',[10,500,200,25],'Callback',@addBackgrounds);
@@ -56,6 +56,19 @@ function bulkFret
     removeBackgrounds=true;
     normalize=false;
     
+    function resizeWindow(source,event)
+        newPos  = get(mainWindow,'Position');
+        newSize = newPos(3:4);
+        delSize = newSize-[1280,720];
+        
+        set(table,'Position',[10,530+delSize(2),332,168]);
+        set(graph,'Position',[[400,100],[800,600]+delSize]);
+        set(addToBackgrounds,'Position',[10,500+delSize(2),200,25]);
+        set(useBackgrounds,'Position',[200,450+delSize(2),50,25]);
+        set(backgroundLable,'Position',[10,457+delSize(2),175,15]);
+        set(backgroundEnable,'Position',[10,425+delSize(2),150,25]);
+        set(normEnable,'Position',[10,400+delSize(2),125,25]);
+    end
     function drawCells(cells)
         data=doubles;
         X=data(1:end,1);
@@ -78,8 +91,7 @@ function bulkFret
         end
     end
    
-    function CellSelection(source,event)
-        
+    function CellSelection(source,event) 
         tempList=event.Indices;
         selectedCells=zeros(size(tempList,1),1);
         for i=1:size(selectedCells,1)
