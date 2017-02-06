@@ -44,9 +44,10 @@ function bulkFret
     
     mainWindow          = figure('Name','Bulk Fret','NumberTitle','off','Visible','on','Position',[25,25,1280,720],'ResizeFcn',@resizeWindow);
     mainWindow.MenuBar='none';
+    file;
+    path;
     fileMenu=uimenu('Label','File');
-    file=[];
-    uimenu(fileMenu,'Label','Open','Callback',@openFile);
+    uimenu(fileMenu,'Label','Open','Callback','[file=uigetfile()');
     uimenu(fileMenu,'Label','Save','Callback','disp(''save'')');
     uimenu(fileMenu,'Label','Quit','Callback','disp(''exit'')');
     fileMenu=uimenu('Label','View');
@@ -63,9 +64,7 @@ function bulkFret
     normalizations=ones(size(doubles,2),1)*.5;
     removeBackgrounds=true;
     normalize=false;
-    function openFile(source,event)
-        [file,path]=uigetfile({'*.m';'*.slx';'*.mat';'*.*'},'File Selector')
-    end
+
     function resizeWindow(source,event)
         newPos  = get(mainWindow,'Position');
         newSize = newPos(3:4);
@@ -115,8 +114,6 @@ function bulkFret
             backgroundStrings(i+1)=cellList(backgroundIDs(i)+1);
         end
         set(useBackgrounds,'String',backgroundStrings);
-        file
-        path
     end
     function useBackground(source,event)
         try
