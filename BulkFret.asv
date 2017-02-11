@@ -1,5 +1,6 @@
 function bulkFret
     clc
+    
     doubles=zeros(116,99);
     backgroundsStrings={'  '};
     backgroundIDs=[];
@@ -16,7 +17,7 @@ function bulkFret
     uimenu(fileMenu,'Label','Quit','Callback','disp(''exit'')');
     fileMenu=uimenu('Label','View');
     uimenu(fileMenu,'Label','Quit','Callback','disp(''exit'')');
-    table               = uitable(mainWindow,'Data',cellTable,'Position',[10,530,332,168],'ColumnWidth',{25,25,25,25,25,25,25,25,25,25,25,25},'CellSelectionCallback',@CellSelection);
+    table               = uitable(mainWindow,'Data',cellTable,'Position',[10,530,332,168],'ColumnWidth',{25,25,25,25,25,25,25,25,25,25,25,25},'CellSelectionCallback',@CellSelection,'Enable','off');
     graph               = axes('Units','Pixels','Position',[400,100,800,600],'Parent',mainWindow);
     addToBackgrounds	= uicontrol('Style','pushbutton','String','Add selected cells to background list.','Position',[10,500,200,25],'Callback',@addBackgrounds);
     useBackgrounds      = uicontrol('Style','popupmenu','String',backgroundsStrings,'Callback',@useBackground,'Position',[200,450,50,25]);
@@ -64,6 +65,7 @@ function bulkFret
         end
         set(get(graph,'XLabel'),'String','Wavelength');
         set(get(graph,'YLabel'),'String','Intensity');
+        set(table,'Enable','on')
     end
     function resizeWindow(source,event)
         newPos  = get(mainWindow,'Position');
@@ -79,26 +81,26 @@ function bulkFret
         set(normEnable,'Position',[10,400+delSize(2),125,25]);
     end
     function drawCells(cells)
-        cells
-        data=doubles;
+        data=doubles; %This will need to be rewritten to make data be the data _as we would like to display it_.
         X=data(1:end,1);
         Xi=min(X):0.2:max(X);
         plot(graph,[600,600],[0,0])
-        1.0max(max(data(1:end,3:end)))
-        axis([min(X),max(X),0,2*max(max(data(1:end,3:end)))])
+        bufferSize=0.05;
+        axis([min(X),max(X),min(min(data(1:end,3:end)))-bufferSize*(max(max(data(1:end,3:end)))-min(min(data(1:end,3:end)))),(1+bufferSize)*max(max(data(1:end,3:end)))]); %broken.  Not sure how.
         for i=1:size(cells,1)
             cells(i);
-            if and(removeBackgrounds,backgrounds(cells(i))~=0)
-                tempData=(data(1:end,cells(i)+3)-data(1:end,backgrounds(cells(i))+3));
+            if and(removeBackgrounds,backgrounds(cells(i))~=0) %Temporary, should be made redundent
+                                                               %by the way the initialization of data is handled
+                tempData=(data(1:end,cells(i)+3)-data(1:end,backgrounds(cells(i))+3));                                                                       
             else
-                tempData=data(1:end,cells(i)+3);
+                tempData=data(1:end,cells(i)+3); 
             end
             Y=tempData;
             if sum(Y)~=0
                 hold on
                 Yi=pchip(X,Y,Xi);
                 plot(graph,Xi,Yi,'LineWidth',1.5);
-                axis([min(X),max(X),0,max(max(data(1:end,3:end)))])
+                axis([min(X),max(X),0,1.05*max(max(data(1:end,3:end)))])
                 hold off
             end  
         end
@@ -114,6 +116,9 @@ function bulkFret
         drawCells(selectedCells)
     end
     function addBackgrounds(source,event)
+        for i=1:size(selectedCells,1)
+            if any(b
+        end
         backgroundIDs=[backgroundIDs;selectedCells];
         backgroundsStrings={'--'};
         for i=1:size(backgroundIDs,1)

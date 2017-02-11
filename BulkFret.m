@@ -1,5 +1,6 @@
 function bulkFret
     clc
+    
     doubles=zeros(116,99);
     backgroundsStrings={'  '};
     backgroundIDs=[];
@@ -16,7 +17,7 @@ function bulkFret
     uimenu(fileMenu,'Label','Quit','Callback','disp(''exit'')');
     fileMenu=uimenu('Label','View');
     uimenu(fileMenu,'Label','Quit','Callback','disp(''exit'')');
-    table               = uitable(mainWindow,'Data',cellTable,'Position',[10,530,332,168],'ColumnWidth',{25,25,25,25,25,25,25,25,25,25,25,25},'CellSelectionCallback',@CellSelection);
+    table               = uitable(mainWindow,'Data',cellTable,'Position',[10,530,332,168],'ColumnWidth',{25,25,25,25,25,25,25,25,25,25,25,25},'CellSelectionCallback',@CellSelection,'Enable','off');
     graph               = axes('Units','Pixels','Position',[400,100,800,600],'Parent',mainWindow);
     addToBackgrounds	= uicontrol('Style','pushbutton','String','Add selected cells to background list.','Position',[10,500,200,25],'Callback',@addBackgrounds);
     useBackgrounds      = uicontrol('Style','popupmenu','String',backgroundsStrings,'Callback',@useBackground,'Position',[200,450,50,25]);
@@ -64,6 +65,7 @@ function bulkFret
         end
         set(get(graph,'XLabel'),'String','Wavelength');
         set(get(graph,'YLabel'),'String','Intensity');
+        set(table,'Enable','on')
     end
     function resizeWindow(source,event)
         newPos  = get(mainWindow,'Position');
@@ -114,7 +116,12 @@ function bulkFret
         drawCells(selectedCells)
     end
     function addBackgrounds(source,event)
-        backgroundIDs=[backgroundIDs;selectedCells];
+        for i=1:size(selectedCells,1)
+            if any(backgroundIDs==selectedCells(i))==0
+                backgroundIDs=[backgroundIDs;selectedCells(i)];
+            end
+        end
+        backgroundIDs=sort(backgroundIDs,1)
         backgroundsStrings={'--'};
         for i=1:size(backgroundIDs,1)
             backgroundStrings(i+1)=cellList(backgroundIDs(i)+1);
