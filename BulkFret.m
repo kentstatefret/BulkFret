@@ -7,7 +7,7 @@ function bulkFret
     selectedCells=[];
     cellTable={'A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12';'B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12';'C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12';'D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12';'E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12';'F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12';'G1','G2','G3','G4','G5','G6','G7','G8','G9','G10','G11','G12';'H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12'};
     cellList={'A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12','B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12','C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','G1','G2','G3','G4','G5','G6','G7','G8','G9','G10','G11','G12','H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12'}; 
-    backgrounds=zeros(size(doubles,2),1);
+    backgrounds=zeros(size(doubles,2)+1,1);
     normalizations=ones(size(doubles,2),1)*0.5;
     file='';
     path='';
@@ -83,13 +83,15 @@ function bulkFret
         set(normEnable,'Position',[10,400+delSize(2),125,25]);
     end
     function drawCells(cells)
+        cells
+        backgrounds
         bkgrdEnabled=get(backgroundEnable,'Value');
         normalize=get(normEnable,'Value');
         tempData=doubles;  
         if bkgrdEnabled
             for i=1:size(cells,1)
-                if backgrounds(cells(i))~=0
-                    tempData(1:end,cells(i)+3)=doubles(1:end,cells(i)+3)-doubles(1:end,backgrounds(cells(i))+3);
+                if backgrounds(cells(i)+1)~=0
+                    tempData(1:end,cells(i)+3)=doubles(1:end,cells(i)+3)-doubles(1:end,backgrounds(cells(i)+1)+3);
                 end
             end
         end
@@ -127,7 +129,11 @@ function bulkFret
             end  
         end
         set(graph,'Xlim',[min(X),max(X)])
-        set(graph,'Ylim',[yMin-bufferSize*(yMax-yMin),(1+bufferSize)*yMax])
+        if yMin<yMax
+            set(graph,'Ylim',[yMin-bufferSize*(yMax-yMin),(1+bufferSize)*yMax])
+        else
+            set(graph,'Ylim',[yMin-bufferSize,(1+bufferSize)])
+        end
         set(get(graph,'XLabel'),'String','Wavelength');
         set(get(graph,'YLabel'),'String','Intensity');
     end
@@ -141,7 +147,7 @@ function bulkFret
         for i=1:size(selectedCells,1)
             selectedCells(i)=12*(tempList(i,1)-1)+(tempList(i,2)-1);
             try
-                backgroundID=backgrounds(selectedCells(i));
+                backgroundID=backgrounds(selectedCells(i)+1);
             catch
                 backgroundID=0;
             end
@@ -174,7 +180,7 @@ function bulkFret
             backgroundID=0;
         end
         for i=1:size(selectedCells,1)
-            backgrounds(selectedCells(i))=backgroundID;
+            backgrounds(selectedCells(i)+1)=backgroundID;
         end
         drawCells(selectedCells)
     end
