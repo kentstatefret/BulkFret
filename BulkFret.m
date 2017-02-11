@@ -115,8 +115,6 @@ function bulkFret
             backgroundStrings(i+1)=cellList(backgroundIDs(i)+1);
         end
         set(useBackgrounds,'String',backgroundStrings);
-        file
-        path
     end
     function useBackground(source,event)
         try
