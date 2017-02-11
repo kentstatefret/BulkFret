@@ -137,10 +137,22 @@ function bulkFret
     function CellSelection(source,event) 
         tempList=event.Indices;
         selectedCells=zeros(size(tempList,1),1);
+        cellBackgrounds=[];
         for i=1:size(selectedCells,1)
             selectedCells(i)=12*(tempList(i,1)-1)+(tempList(i,2)-1);
+            try
+                backgroundID=backgrounds(selectedCells(i));
+            catch
+                backgroundID=0;
+            end
+            cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
-        drawCells(selectedCells)
+        if and(size(cellBackgrounds,1)==1,size(find(backgroundIDs==cellBackgrounds,1),1))
+            set(useBackgrounds,'Value',1+find(backgroundIDs==cellBackgrounds,1))
+        else
+            set(useBackgrounds,'Value',1);
+        end
+        drawCells(selectedCells);
     end
     function addBackgrounds(source,event)
         for i=1:size(selectedCells,1)
@@ -157,9 +169,9 @@ function bulkFret
     end
     function useBackground(source,event)
         try
-            backgroundID=backgroundIDs(get(source,'Value')-1)
+            backgroundID=backgroundIDs(get(source,'Value')-1);
         catch
-            backgroundID=0
+            backgroundID=0;
         end
         for i=1:size(selectedCells,1)
             backgrounds(selectedCells(i))=backgroundID;
