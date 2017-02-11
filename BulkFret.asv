@@ -12,6 +12,7 @@ function bulkFret
     fileMenu=uimenu('Label','File');
     file='';
     path='';
+    
     uimenu(fileMenu,'Label','Open','Callback',@openFile);
     uimenu(fileMenu,'Label','Save','Callback','disp(''save'')');
     uimenu(fileMenu,'Label','Quit','Callback','disp(''exit'')');
@@ -22,13 +23,11 @@ function bulkFret
     addToBackgrounds	= uicontrol('Style','pushbutton','String','Add selected cells to background list.','Position',[10,500,200,25],'Callback',@addBackgrounds);
     useBackgrounds      = uicontrol('Style','popupmenu','String',backgroundsStrings,'Callback',@useBackground,'Position',[200,450,50,25]);
     backgroundLable     = uicontrol('Style','text','String','Select Background for current cells','HorizontalAlignment','left','Position',[10,457,175,15]);
-    backgroundEnable	= uicontrol('Style','checkbox','String','Subtract Backgrounds','Position',[10,425,150,25]);
-    normEnable          = uicontrol('Style','checkbox','String','Normalize plots','Position',[10,400,125,25]);
+    backgroundEnable	= uicontrol('Style','checkbox','String','Subtract Backgrounds','Position',[10,425,150,25],'Value',1,'Callback',@drawCellsCallback);
+    normEnable          = uicontrol('Style','checkbox','String','Normalize plots','Position',[10,400,125,25],'Value',1,'Callback',@drawCellsCallback);
     
     backgrounds=zeros(size(doubles,2),1);
-    normalizations=ones(size(doubles,2),1)*.5;
-    removeBackgrounds=true;
-    normalize=false;
+    normalizations=ones(size(doubles,2),1);
     function openFile(source,event)
         [file,path]=uigetfile({'*.xls';'*.*'},'File Selector');
         fid=fopen(strcat(path,file));
@@ -81,15 +80,30 @@ function bulkFret
         set(normEnable,'Position',[10,400+delSize(2),125,25]);
     end
     function drawCells(cells)
-        data=doubles; %This will need to be rewritten to make data be the data _as we would like to display it_.
+        bkgrdEnabled=get(backgroundEnable,'Value');
+        normalize=get(normEnable,'Value');
+        tempData=doubles;  
+        if bkgrdEnabled
+            for i=1:size(cells,1)
+                if backgrounds(cells(i))~=0
+                    tempData(1:end,cells(i)+3)=doubles(1:end,cells(i)+3)-doubles(1:end,backgrounds(cells(i))+3);
+                end
+            end
+        end
+        data=tempData;
+        if normalize
+            for i=1:size(cells,1)
+                data(1:end,cells(i)+3)=normalizations(cells(i)+3)*tempData(1:end,cells(i)+3);
+            end
+        end
+        sum(sum(tempData-data))
         X=data(1:end,1);
         Xi=min(X):0.2:max(X);
         plot(graph,[600,600],[0,0])
         bufferSize=0.05;
         axis([min(X),max(X),min(min(data(1:end,3:end)))-bufferSize*(max(max(data(1:end,3:end)))-min(min(data(1:end,3:end)))),(1+bufferSize)*max(max(data(1:end,3:end)))]); %broken.  Not sure how.
         for i=1:size(cells,1)
-            cells(i);
-            if and(removeBackgrounds,backgrounds(cells(i))~=0) %Temporary, should be made redundent
+            if and(get(backgroundEnable,'Value'),backgrounds(cells(i))~=0) %Temporary, should be made redundent
                                                                %by the way the initialization of data is handled
                 tempData=(data(1:end,cells(i)+3)-data(1:end,backgrounds(cells(i))+3));                                                                       
             else
@@ -107,6 +121,9 @@ function bulkFret
         set(get(graph,'XLabel'),'String','Wavelength');
         set(get(graph,'YLabel'),'String','Intensity');
     end
+    function drawCellsCallback(source,event)
+        drawCells(selectedCells);
+    end %needed because I can't call drawCells directly from the checkbox.
     function CellSelection(source,event) 
         tempList=event.Indices;
         selectedCells=zeros(size(tempList,1),1);
@@ -117,9 +134,11 @@ function bulkFret
     end
     function addBackgrounds(source,event)
         for i=1:size(selectedCells,1)
-            if any(b
+            if any(backgroundIDs==selectedCells(i))==0
+                backgroundIDs=[backgroundIDs;selectedCells(i)];
+            end
         end
-        backgroundIDs=[backgroundIDs;selectedCells];
+        backgroundIDs=sort(backgroundIDs,1)
         backgroundsStrings={'--'};
         for i=1:size(backgroundIDs,1)
             backgroundStrings(i+1)=cellList(backgroundIDs(i)+1);
