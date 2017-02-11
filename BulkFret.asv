@@ -79,26 +79,26 @@ function bulkFret
         set(normEnable,'Position',[10,400+delSize(2),125,25]);
     end
     function drawCells(cells)
-        data=doubles; %This will need to be rewritten to make data be the data _as we would like to display it_.
+        cells
+        data=doubles;
         X=data(1:end,1);
         Xi=min(X):0.2:max(X);
         plot(graph,[600,600],[0,0])
-        bufferSize=0.05;
-        axis([min(X),max(X),min(min(data(1:end,3:end)))-bufferSize*(max(max(data(1:end,3:end)))-min(min(data(1:end,3:end)))),(1+bufferSize)*max(max(data(1:end,3:end)))]); %broken.  Not sure how.
+        1.0max(max(data(1:end,3:end)))
+        axis([min(X),max(X),0,2*max(max(data(1:end,3:end)))])
         for i=1:size(cells,1)
             cells(i);
-            if and(removeBackgrounds,backgrounds(cells(i))~=0) %Temporary, should be made redundent
-                                                               %by the way the initialization of data is handled
-                tempData=(data(1:end,cells(i)+3)-data(1:end,backgrounds(cells(i))+3));                                                                       
+            if and(removeBackgrounds,backgrounds(cells(i))~=0)
+                tempData=(data(1:end,cells(i)+3)-data(1:end,backgrounds(cells(i))+3));
             else
-                tempData=data(1:end,cells(i)+3); 
+                tempData=data(1:end,cells(i)+3);
             end
             Y=tempData;
             if sum(Y)~=0
                 hold on
                 Yi=pchip(X,Y,Xi);
                 plot(graph,Xi,Yi,'LineWidth',1.5);
-                axis([min(X),max(X),0,1.05*max(max(data(1:end,3:end)))])
+                axis([min(X),max(X),0,max(max(data(1:end,3:end)))])
                 hold off
             end  
         end
