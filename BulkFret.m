@@ -31,7 +31,7 @@ function bulkFret
     removeBackgrounds=true;
     normalize=false;
     function openFile(source,event)
-        [file,path]=uigetfile({'*.m';'*.slx';'*.mat';'*.*'},'File Selector')
+        [file,path]=uigetfile({'*.m';'*.slx';'*.mat';'*.*'},'File Selector');
         fid=fopen(strcat(path,file));
         line = fgetl(fid);
         lines = [];
@@ -81,6 +81,7 @@ function bulkFret
     function drawCells(cells)
         data=doubles;
         X=data(1:end,1);
+        Xi=min(X):0.2:max(X)
         plot(graph,[600,600],[0,0])
         axis([min(X),max(X),0,max(max(data(1:end,3:end)))])
         for i=1:size(cells,1)
@@ -93,7 +94,8 @@ function bulkFret
             Y=tempData;
             if sum(Y)~=0
                 hold on
-                plot(graph,X,Y)
+                Yi=pchip(X,Y,Xi);
+                plot(graph,Xi,Yi);
                 axis([min(X),max(X),0,max(max(data(1:end,3:end)))])
                 hold off
             end  
