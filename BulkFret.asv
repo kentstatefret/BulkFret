@@ -19,16 +19,17 @@ function bulkFret
     
     %main window
     mainWindow          = figure('Name','Bulk Fret','NumberTitle','off','Visible','on','Position',[25,25,1280,720],'ResizeFcn',@resizeWindow);
-    mainWindow.MenuBar='none';
+    mainWindow.MenuBar  = 'none';
     
     %file menu
-    fileMenu=uimenu('Label','File');
+    fileMenu            = uimenu('Label','File');
     uimenu(fileMenu,'Label','Open','Callback',@openFile);
     uimenu(fileMenu,'Label','Save','Callback','disp(''save'')');
     uimenu(fileMenu,'Label','Quit','Callback','disp(''exit'')');
     
     %view menu
-    viewMenu=uimenu('Label','View');
+    viewMenu            = uimenu('Label','View');
+    uimenu(viewMenu,'Label','
     uimenu(viewMenu,'Label','Quit','Callback','disp(''exit'')');
     
     %cell select table
@@ -186,9 +187,12 @@ function bulkFret
         %called when which cells are selected on the table.
         tempList=event.Indices;
         selectedCells=zeros(size(tempList,1),1);
+        
         cellBackgrounds=[];
         for i=1:size(selectedCells,1)
-            selectedCells(i)=12*(tempList(i,1)-1)+(tempList(i,2)-1);
+            selectedCells(i)=12*(tempList(i,1)-1)+(tempList(i,2)-1); % actually builds up selectedCells, arguably the main job of this function
+            %The rest of this loop and the next if statement are dedicated
+            %to updating the dropdown
             try
                 backgroundID=backgrounds(selectedCells(i)+1);
             catch
@@ -201,10 +205,12 @@ function bulkFret
         else
             set(useBackgrounds,'Value',1);
         end
-        drawCells(selectedCells);  %Need to update which cells are actually drawn 
+        drawCells(selectedCells);  %Need to update which cells are actually drawn after the cells are selected
     end
 
     function addBackgrounds(source,event)
+        %addes the selected cells to the dropdown list of possible
+        %backgrounds.
         for i=1:size(selectedCells,1)
             if any(backgroundIDs==selectedCells(i))==0
                 backgroundIDs=[backgroundIDs;selectedCells(i)];
@@ -219,6 +225,8 @@ function bulkFret
     end
 
     function useBackground(source,event)
+        %selects which cell to use as the background for the selected cell,
+        %out of the dropdown list.
         try
             backgroundID=backgroundIDs(get(source,'Value')-1);
         catch

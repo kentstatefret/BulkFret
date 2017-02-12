@@ -1,17 +1,23 @@
 function bulkFret
     clc
     
-    doubles=zeros(116,99);      %stores data in a readable format
-    backgroundsStrings={'  '};  %hold list of backgrounds in human readable format
-    backgroundIDs=[];           %stores the IDs of the backgrounds.  A1=0,A2=1,B1=12, etc
-    selectedCells=[];           %stores the selected cells in the same format as background IDs
     cellTable={'A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12';'B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12';'C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12';'D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12';'E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12';'F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12';'G1','G2','G3','G4','G5','G6','G7','G8','G9','G10','G11','G12';'H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12'};
     %^ stores the cell scrings in the format used by the selector table, a
     %2d array
     cellList={'A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12','B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12','C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','G1','G2','G3','G4','G5','G6','G7','G8','G9','G10','G11','G12','H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12'}; 
     %^ stores the cell strings in a 1d array.
+    
+    doubles=zeros(116,99);      %stores data in a readable format
+    backgroundsStrings={'  '};  %hold list of backgrounds in human readable format
+    backgroundIDs=[];           %stores the IDs of the backgrounds.  A1=0,A2=1,B1=12, etc
+    selectedCells=[];           %stores the selected cells in the same format as background IDs
+    legendLables={};
+    
+
+    
     backgrounds=zeros(size(doubles,2)+1,1); %stores the background vectors such that the background for a cell is stored in the same column as the cell.  As initalized, will have no effect
     normalizations=ones(size(doubles,2)+1,1); %stores the normalization constants such that the appropriate constant is at the same column as the cell data.  As initalized, will have no effect.
+    
     file=''; % stores the file name to open
     path=''; % stores the file path.
     
@@ -19,16 +25,16 @@ function bulkFret
     
     %main window
     mainWindow          = figure('Name','Bulk Fret','NumberTitle','off','Visible','on','Position',[25,25,1280,720],'ResizeFcn',@resizeWindow);
-    mainWindow.MenuBar='none';
+    mainWindow.MenuBar  = 'none';
     
     %file menu
-    fileMenu=uimenu('Label','File');
+    fileMenu            = uimenu('Label','File');
     uimenu(fileMenu,'Label','Open','Callback',@openFile);
     uimenu(fileMenu,'Label','Save','Callback','disp(''save'')');
     uimenu(fileMenu,'Label','Quit','Callback','disp(''exit'')');
     
     %view menu
-    viewMenu=uimenu('Label','View');
+    viewMenu            = uimenu('Label','View');
     uimenu(viewMenu,'Label','Quit','Callback','disp(''exit'')');
     
     %cell select table
@@ -138,7 +144,7 @@ function bulkFret
         X=data(1:end,1); %the wavelengths are stored in the first column
         Xi=min(X):0.2:max(X); % produces a more precise x axis for the smoothing function
         
-        plot(graph,[600,600],[0,0]) %wipes the graph before drawing the selected cells
+        cla(graph) %wipes the graph before drawing the selected cells
         
         for i=1:size(cells,1)
             Y=data(1:end,cells(i)+3);
@@ -171,6 +177,12 @@ function bulkFret
         else
             set(graph,'Ylim',[yMin-bufferSize,(1+bufferSize)])
         end
+        
+        labels={};
+        for i=1:size(cells,1)
+            labels(i)=cellList(cells(i)+1);
+        end
+        legend(graph,labels);
         
         %Labels the axes
         set(get(graph,'XLabel'),'String','Wavelength');
@@ -236,4 +248,5 @@ function bulkFret
         end
         drawCells(selectedCells)
     end
+    
 end
