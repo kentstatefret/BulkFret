@@ -32,6 +32,7 @@ function bulkFret
     fileMenu            = uimenu('Label','File');
     uimenu(fileMenu,'Label','Open','Callback',@openFile);
     uimenu(fileMenu,'Label','Save','Callback','disp(''save'')');
+    uimenu(fileMenu,'Label','Export Image','Callback',@exportImage)
     uimenu(fileMenu,'Label','Quit','Callback','disp(''exit'')');
     
     %view menu
@@ -129,7 +130,7 @@ function bulkFret
         set(colorEdit,'Position',[150,375+delSize(2),125,25]);
     end
 
-    function drawCells(cells)
+    function drawCells(cells,ax)
         %backend function to draw the cells specified by "cells" to the
         %figure.  Should be called after most updates.
         
@@ -162,7 +163,7 @@ function bulkFret
             if sum(Y)~=0
                 hold on
                 Yi=pchip(X,Y,Xi); %creates smoothed version of the Y data
-                plot(graph,Xi,Yi,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
+                plot(ax,Xi,Yi,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
                 hold off
             end  
         end
@@ -184,9 +185,9 @@ function bulkFret
         end
         set(graph,'Xlim',[min(X),max(X)])
         if yMin<yMax
-            set(graph,'Ylim',[yMin-bufferSize*(yMax-yMin),(1+bufferSize)*yMax-bufferSize*yMin])
+            set(ax,'Ylim',[yMin-bufferSize*(yMax-yMin),(1+bufferSize)*yMax-bufferSize*yMin])
         else
-            set(graph,'Ylim',[yMin-bufferSize,(1+bufferSize)])
+            set(ax,'Ylim',[yMin-bufferSize,(1+bufferSize)])
         end
         
         labels={};
@@ -196,20 +197,20 @@ function bulkFret
             end
         end
         if size(labels,1)>0
-            legend(graph,'show')
-            legend(graph,labels);
+            legend(ax,'show')
+            legend(ax,labels);
         else
-            legend(graph,'off')
+            legend(ax,'off')
         end
         
         %Labels the axes
-        set(get(graph,'XLabel'),'String','Wavelength');
-        set(get(graph,'YLabel'),'String','Intensity');
+        set(get(ax,'XLabel'),'String','Wavelength');
+        set(get(ax,'YLabel'),'String','Intensity');
     end
 
     function drawCellsCallback(source,event)
         %needed because I can't call drawCells directly from the checkbox.
-        drawCells(selectedCells);
+        drawCells(selectedCells,graph);
     end 
     
     function CellSelection(source,event) 
@@ -234,7 +235,7 @@ function bulkFret
         else
             set(useBackgrounds,'Value',1);
         end
-        drawCells(selectedCells);  %Need to update which cells are actually drawn after the cells are selected
+        drawCells(selectedCells,graph);  %Need to update which cells are actually drawn after the cells are selected
     end
 
     function addBackgrounds(source,event)
@@ -264,14 +265,14 @@ function bulkFret
         for i=1:size(selectedCells,1)
             backgrounds(selectedCells(i)+1)=backgroundID;
         end
-        drawCells(selectedCells)
+        drawCells(selectedCells,graph)
     end
     
     function captionEdited(source,event)
         for i=1:size(selectedCells,1)
             legendLables{selectedCells(i)+1}=get(source,'String');
         end
-        drawCells(selectedCells)
+        drawCells(selectedCells,graph)
     end
     
     function changeColor(source,event)
@@ -279,6 +280,14 @@ function bulkFret
         for i=1:size(selectedCells,1)
             cellColors(selectedCells(i)+1,1:end)=color;
         end
-        drawCells(selectedCells)
+        drawCells(selectedCells,graph)
+    end
+    
+    function exportImage(source,event)
+        tempFigure=figure();
+        tempGraph=axes('Units','Pixels','Parent',tempFigure);
+        drawCells(selectedCells,tempGraph);
+        print(tempFigure,'exportedGraph','-dpng');
+        close(tempFigure);
     end
 end
