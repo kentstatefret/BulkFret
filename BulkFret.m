@@ -111,6 +111,11 @@ function bulkFret
         
         newPos  = get(mainWindow,'Position');
         newSize = newPos(3:4);
+        if or(newSize(1)<5000,newSize(2)<200) % placeholder, replace with this https://www.mathworks.com/matlabcentral/fileexchange/38527-limit-figure-size eventually
+            newSize=[1000,700];
+            newPos=[newPos(1:2),newSize];
+            set(mainWindow,'Position',newPos);
+        end
         delSize = newSize-[1280,720];
         
         set(table,'Position',[10,530+delSize(2),332,168]);
@@ -157,7 +162,7 @@ function bulkFret
             if sum(Y)~=0
                 hold on
                 Yi=pchip(X,Y,Xi); %creates smoothed version of the Y data
-                plot(graph,Xi,Yi,'LineWidth',1.5,'Color',cellColors(cells(i),1:end));
+                plot(graph,Xi,Yi,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
                 hold off
             end  
         end
@@ -270,9 +275,9 @@ function bulkFret
     end
     
     function changeColor(source,event)
-        color=uisetcolor([0,0,0])
+        color=uisetcolor([0,0,0]);
         for i=1:size(selectedCells,1)
-            cellColors(selectedCells(i),1:end)=color;
+            cellColors(selectedCells(i)+1,1:end)=color;
         end
         drawCells(selectedCells)
     end
