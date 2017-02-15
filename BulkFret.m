@@ -112,7 +112,7 @@ function bulkFret
         
         newPos  = get(mainWindow,'Position');
         newSize = newPos(3:4);
-        if or(newSize(1)<5000,newSize(2)<200) % placeholder, replace with this https://www.mathworks.com/matlabcentral/fileexchange/38527-limit-figure-size eventually
+        if or(newSize(1)<500,newSize(2)<200) % placeholder, replace with this https://www.mathworks.com/matlabcentral/fileexchange/38527-limit-figure-size eventually
             newSize=[1000,700];
             newPos=[newPos(1:2),newSize];
             set(mainWindow,'Position',newPos);
