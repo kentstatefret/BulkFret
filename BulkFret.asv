@@ -228,11 +228,11 @@ function bulkFret
                 backgroundID=0;
             end
 
-            cellBackgrounds(1:size(unique,1)=unique([cellBackgrounds;backgroundID]);
+            cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
-        cellBackgrounds(size(backgroundIDs,1))=0
-        backgroundIDs
-        cellBackgrounds
+        if size(backgroundIDs,1)>0
+            cellBackgrounds(size(backgroundIDs,1),1)=0;
+        end
 
         if and(size(cellBackgrounds,1)==1,size(find(backgroundIDs==cellBackgrounds,1),1))
             set(useBackgrounds,'Value',1+find(backgroundIDs==cellBackgrounds,1))
@@ -241,8 +241,6 @@ function bulkFret
         end
         drawCells(selectedCells,graph);  %Need to update which cells are actually drawn after the cells are selected
     end
-
-
 
     function addBackgrounds(source,event)
         %addes the selected cells to the dropdown list of possible
@@ -290,11 +288,14 @@ function bulkFret
     end
     
     function exportImage(source,event)
-        tempFigure=figure();
-        tempGraph=axes('Units','Pixels','Parent',tempFigure);
-        drawCells(selectedCells,tempGraph);
-        print(tempFigure,'exportedGraph','-dpng');
-        close(tempFigure);
+        [iPath,iFile]=uiputfile({'*.png';'*.*'},'File Selector')
+        if and(iPath~=0,iFile~=0)
+            tempFigure=figure();
+            tempGraph=axes('Units','Pixels','Parent',tempFigure);
+            drawCells(selectedCells,tempGraph);
+            print([iPath,'\',iFile],'exportedGraph','-dpng');
+            close(tempFigure);
+        end
     end
     
     function keyDownCallback(source,event)
