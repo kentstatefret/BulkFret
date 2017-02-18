@@ -1,2 +1,3 @@
 clc
-a=zeros(1,96)
+colors=
+size(colors)

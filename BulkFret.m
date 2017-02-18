@@ -13,7 +13,7 @@ function bulkFret
     backgroundIDs=[];           %stores the IDs of the backgrounds.  A1=0,A2=1,B1=12, etc
     selectedCells=[];           %stores the selected cells in the same format as background IDs
     legendLables=cellList;
-    cellColors=randi([0 1], 116,3)*0.8+ones(116,3)*0.1;
+    cellColors=repmat([0,0,0;0,0,1;0,1,0;0,1,1;1,0,0;1,0,1;1,1,0;1,1,1]/2+ones(8,3)/4,12,1); %Default color scheme.
 
     
     backgrounds=zeros(size(doubles,2)+1,1); %stores the background vectors such that the background for a cell is stored in the same column as the cell.  As initalized, will have no effect

@@ -1,3 +1,2 @@
-
-
-size(find(tempBackgrounds==cellBackgrounds,1),1)
+clc
+colors=[0,0,0;0,0,1;0,1,0;0,1,1;0,]
