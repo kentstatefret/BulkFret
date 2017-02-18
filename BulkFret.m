@@ -289,7 +289,7 @@ function bulkFret
     
     function exportImage(source,event)
         [iFile,iPath]=uiputfile({'*.png';'*.*'},'File Selector');
-        tempFigure=figure();
+        tempFigure=figure('Position',get( 0, 'Screensize' )); %may not work for multi-monitor
         tempGraph=axes('Units','Pixels','Parent',tempFigure);
         drawCells(selectedCells,tempGraph);
         try

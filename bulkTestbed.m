@@ -1,4 +1,1 @@
-a='testing';
-b=0;
-
-size(b)
+screensize = get( 0, 'Screensize' )
