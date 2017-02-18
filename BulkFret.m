@@ -141,22 +141,21 @@ function bulkFret
                 end
             end
         end
-        
+        n
         if n %multiplies the vectors by the normalization scalers.
             for i=1:size(cells,1)
-                data(1:end,cells(i)+3)=normalizations(cells(i)+3)*data(1:end,cells(i)+3);
+                data(1:end,cells(i)+3)=normalizations(cells(i)+3,1)*data(1:end,cells(i)+3);
             end
         end
     end
 
     function drawCells(cells,ax)
-        cells
         %backend function to draw the cells specified by "cells" to the
         %figure.  Should be called after most updates.
         
         %Need these two to know how to draw the plots.
         
-        data=normalizeAndBackgroundSubtract(doubles,cells,get(backgroundEnable,'Value'),get(normEnable,'Value'));
+        data=normalizeAndBackgroundSubtract(doubles,cells,get(normEnable,'Value'),get(backgroundEnable,'Value'));
         
         X=data(1:end,1); %the wavelengths are stored in the first column
         Xi=min(X):0.2:max(X); % produces a more precise x axis for the smoothing function
@@ -360,6 +359,7 @@ function bulkFret
             normRanges(selectedCells(i)+3,1)=index1;
             normRanges(selectedCells(i)+3,2)=index2;
         end
-        getNormalizationValues(doubles,backgrounds)
+        normalizations=getNormalizationValues(doubles,backgrounds)
+        drawCells(selectedCells,graph)
     end
 end
