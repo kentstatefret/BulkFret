@@ -16,9 +16,10 @@ function bulkFret
     cellColors=repmat([0,0,0;0,0,1;0,1,0;0,1,1;1,0,0;1,0,1;1,1,0;1,1,1]/2+ones(8,3)/4,12,1); %Default color scheme.
 
     
-    backgrounds=zeros(size(doubles,2)+1,1); %stores the background vectors such that the background for a cell is stored in the same column as the cell.  As initalized, will have no effect
+    backgrounds=[]; %stores the background vectors such that the background for a cell is stored in the same column as the cell.  As initalized, will have no effect
     normalizations=ones(size(doubles,2)+1,1); %stores the normalization constants such that the appropriate constant is at the same column as the cell data.  As initalized, will have no effect.
     
+    normRanges=zeros(99,2);
     file=''; % stores the file name to open.
     path=''; % stores the file path.
     
@@ -43,7 +44,7 @@ function bulkFret
     table               = uitable(mainWindow,'Data',cellTable,'Position',[10,530,332,168],'ColumnWidth',{25,25,25,25,25,25,25,25,25,25,25,25},'CellSelectionCallback',@CellSelection,'Enable','off');
     
     %main graph
-    graph               = axes('Units','Pixels','Position',[400,100,800,600],'Parent',mainWindow);
+    graph               = axes('Units','Pixels','Position',[400,100,800,600],'Parent',mainWindow,'ButtonDownFcn',@graphClickCallback);
     
     %button to add cellected cells to list of possible backgrounds
     addToBackgrounds	= uicontrol('Style','pushbutton','String','Add selected cells to background list.','Position',[10,500,200,25],'Callback',@addBackgrounds);
@@ -100,6 +101,8 @@ function bulkFret
             end
         end
         
+        backgrounds=zeros(size(doubles));
+        
         set(get(graph,'XLabel'),'String','Wavelength');
         set(get(graph,'YLabel'),'String','Intensity');
         set(table,'Enable','on'); %if the table is enabled before a file is open, bad things end up happening.
@@ -108,25 +111,25 @@ function bulkFret
     function resizeWindow(source,event)
         %function to move and resize GUI elements when the window is
         %resized.
-        
-        newPos  = get(mainWindow,'Position');
-        newSize = newPos(3:4);
-        if or(newSize(1)<500,newSize(2)<200) % placeholder, replace with this https://www.mathworks.com/matlabcentral/fileexchange/38527-limit-figure-size eventually
-            newSize=[1000,700];
-            newPos=[newPos(1:2),newSize];
-            set(mainWindow,'Position',newPos);
-        end
-        delSize = newSize-[1280,720];
-        
-        set(table,'Position',[10,530+delSize(2),332,168]);
-        set(graph,'Position',[[400,100],[800,600]+delSize]);
-        set(addToBackgrounds,'Position',[10,500+delSize(2),200,25]);
-        set(useBackgrounds,'Position',[200,450+delSize(2),50,25]);
-        set(backgroundLable,'Position',[10,457+delSize(2),175,15]);
-        set(backgroundEnable,'Position',[10,425+delSize(2),150,25]);
-        set(normEnable,'Position',[10,400+delSize(2),125,25]);
-        set(captionEdit,'Position',[10,375+delSize(2),125,25]);
-        set(colorEdit,'Position',[150,375+delSize(2),125,25]);
+        try
+            newPos  = get(mainWindow,'Position');
+            newSize = newPos(3:4);
+            if or(newSize(1)<500,newSize(2)<200) % placeholder, replace with this https://www.mathworks.com/matlabcentral/fileexchange/38527-limit-figure-size eventually
+                newSize=[1000,700];
+                newPos=[newPos(1:2),newSize];
+                set(mainWindow,'Position',newPos);
+            end
+            delSize = newSize-[1280,720];
+            set(table,'Position',[10,530+delSize(2),332,168]);
+            set(graph,'Position',[[400,100],[800,600]+delSize]);
+            set(addToBackgrounds,'Position',[10,500+delSize(2),200,25]);
+            set(useBackgrounds,'Position',[200,450+delSize(2),50,25]);
+            set(backgroundLable,'Position',[10,457+delSize(2),175,15]);
+            set(backgroundEnable,'Position',[10,425+delSize(2),150,25]);
+            set(normEnable,'Position',[10,400+delSize(2),125,25]);
+            set(captionEdit,'Position',[10,375+delSize(2),125,25]);
+            set(colorEdit,'Position',[150,375+delSize(2),125,25]);
+        end    
     end
 
     function data=normalizeAndBackgroundSubtract(input,cells,n,b)
@@ -147,6 +150,7 @@ function bulkFret
     end
 
     function drawCells(cells,ax)
+        cells
         %backend function to draw the cells specified by "cells" to the
         %figure.  Should be called after most updates.
         
@@ -315,4 +319,47 @@ function bulkFret
         disp(event.Key)
     end
 
+    function norms=getNormalizationValues(data,bckgrnd)
+        norms=ones(size(data,1),2);    %placeholder, do not use.
+        for i=3:99
+            j=normRanges(i,1);
+            k=normRanges(i,2);
+            if (j+k~=0)
+                fit=polyfit(data(j:k,1),data(j:k,i),2);
+                a=fit(1);
+                b=fit(2);
+                c=fit(3);
+
+                if (a~=0 && c-b*b/(4*a)>0)
+                    norms(i,1)=1/(c-b*b/(4*a));
+                end
+                fit=polyfit(data(j:k,1),data(j:k,i)-bckgrnd(j:k,i),2);
+                a=fit(1);
+                b=fit(2);
+                c=fit(3);
+                if (a~=0 && c-b*b/(4*a)>0)
+                    norms(i,2)=1/(c-b*b/(4*a));
+                end
+            end
+        end
+                    %do a quadratic fit.  y=ax^2+bx+c, therefore,
+                    %y_0=c-b^2/(4a).  Make sure parabola is downward facing
+                    %first
+    end
+
+    function graphClickCallback(source,event)
+        [X,Y]=ginput(2);
+        [index1, index1]=min(abs(doubles(1:end,1)-X(1)));
+        [index2, index2]=min(abs(doubles(1:end,1)-X(2)));
+        if (index2<index1)
+            temp=index2;
+            index2=index1;
+            index1=temp;
+        end
+        for i=1:size(selectedCells,1)
+            normRanges(selectedCells(i)+3,1)=index1;
+            normRanges(selectedCells(i)+3,2)=index2;
+        end
+        getNormalizationValues(doubles,backgrounds)
+    end
 end
