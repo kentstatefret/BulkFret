@@ -31,7 +31,7 @@ function bulkFret
     %file menu
     fileMenu            = uimenu('Label','File');
     uimenu(fileMenu,'Label','Open','Callback',@openFile);
-    uimenu(fileMenu,'Label','Save','Callback','disp(''save'')');
+    uimenu(fileMenu,'Label','Save CSV','Callback',@exportCSV);
     uimenu(fileMenu,'Label','Export Image','Callback',@exportImage)
     uimenu(fileMenu,'Label','Quit','Callback','disp(''exit'')');
     
@@ -129,28 +129,30 @@ function bulkFret
         set(colorEdit,'Position',[150,375+delSize(2),125,25]);
     end
 
-    function drawCells(cells,ax)
-        %backend function to draw the cells specified by "cells" to the
-        %figure.  Should be called after most updates.
-        
-        bkgrdEnabled=get(backgroundEnable,'Value');
-        normalize=get(normEnable,'Value');
-        %Need these two to know how to draw the plots.
-        
-        data=doubles;  %data is what eventually get's plotted.
-        if bkgrdEnabled %subtracts the backgrounds from the data
+    function data=normalizeAndBackgroundSubtract(input,cells,n,b)
+        data=input;  %data is what eventually get's output.
+        if b %subtracts the backgrounds from the data
             for i=1:size(cells,1)
                 if backgrounds(cells(i)+1)~=0
-                    data(1:end,cells(i)+3)=doubles(1:end,cells(i)+3)-doubles(1:end,backgrounds(cells(i)+1)+3);
+                    data(1:end,cells(i)+3)=input(1:end,cells(i)+3)-input(1:end,backgrounds(cells(i)+1)+3);
                 end
             end
         end
         
-        if normalize %multiplies the vectors by the normalization scalers.
+        if n %multiplies the vectors by the normalization scalers.
             for i=1:size(cells,1)
                 data(1:end,cells(i)+3)=normalizations(cells(i)+3)*data(1:end,cells(i)+3);
             end
         end
+    end
+
+    function drawCells(cells,ax)
+        %backend function to draw the cells specified by "cells" to the
+        %figure.  Should be called after most updates.
+        
+        %Need these two to know how to draw the plots.
+        
+        data=normalizeAndBackgroundSubtract(doubles,cells,get(backgroundEnable,'Value'),get(normEnable,'Value'));
         
         X=data(1:end,1); %the wavelengths are stored in the first column
         Xi=min(X):0.2:max(X); % produces a more precise x axis for the smoothing function
@@ -288,7 +290,7 @@ function bulkFret
     end
     
     function exportImage(source,event)
-        [iFile,iPath]=uiputfile({'*.png';'*.*'},'File Selector');
+        [iFile,iPath]=uiputfile({'*.png';'*.*'},'Export Image');
         tempFigure=figure('Position',get( 0, 'Screensize' )); %may not work for multi-monitor
         tempGraph=axes('Units','Pixels','Parent',tempFigure);
         drawCells(selectedCells,tempGraph);
@@ -299,6 +301,16 @@ function bulkFret
         drawCells(selectedCells,graph);
     end
     
+    function exportCSV(source,event)
+        [cFile,cPath]=uiputfile({'*.csv';'*.*'},'Export csv');
+        data=normalizeAndBackgroundSubtract(doubles,(0:95).',get(backgroundEnable,'Value'),get(normEnable,'Value'));
+        try
+            csvwrite([cPath,cFile],data);
+        end
+        
+        
+    end
+
     function keyDownCallback(source,event)
         disp(event.Key)
     end

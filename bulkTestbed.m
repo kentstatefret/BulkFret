@@ -1,1 +1,1 @@
-screensize = get( 0, 'Screensize' )
+a=(0:95).'
