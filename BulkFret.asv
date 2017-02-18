@@ -217,7 +217,7 @@ function bulkFret
         tempList=event.Indices;
         selectedCells=zeros(size(tempList,1),1);
         
-        cellBackgrounds=-1*ones
+        cellBackgrounds=[];
         for i=1:size(selectedCells,1)
             selectedCells(i)=12*(tempList(i,1)-1)+(tempList(i,2)-1); % actually builds up selectedCells, arguably the main job of this function
             %The rest of this loop and the next if statement are dedicated
@@ -227,11 +227,13 @@ function bulkFret
             catch
                 backgroundID=0;
             end
-            cellBackgrounds=unique([cellBackgrounds;backgroundID]);
+
+            cellBackgrounds(1:size(unique,1)=unique([cellBackgrounds;backgroundID]);
         end
-        
-        
-        
+        cellBackgrounds(size(backgroundIDs,1))=0
+        backgroundIDs
+        cellBackgrounds
+
         if and(size(cellBackgrounds,1)==1,size(find(backgroundIDs==cellBackgrounds,1),1))
             set(useBackgrounds,'Value',1+find(backgroundIDs==cellBackgrounds,1))
         else
@@ -239,6 +241,8 @@ function bulkFret
         end
         drawCells(selectedCells,graph);  %Need to update which cells are actually drawn after the cells are selected
     end
+
+
 
     function addBackgrounds(source,event)
         %addes the selected cells to the dropdown list of possible

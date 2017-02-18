@@ -227,12 +227,15 @@ function bulkFret
             catch
                 backgroundID=0;
             end
+
             cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
-        
-        cellBackgrounds
+        if size(backgroundIDs,1)>0
+            cellBackgrounds(size(backgroundIDs,1),1)=0;
+        end
         backgroundIDs
-        
+        cellBackgrounds
+
         if and(size(cellBackgrounds,1)==1,size(find(backgroundIDs==cellBackgrounds,1),1))
             set(useBackgrounds,'Value',1+find(backgroundIDs==cellBackgrounds,1))
         else
@@ -240,6 +243,8 @@ function bulkFret
         end
         drawCells(selectedCells,graph);  %Need to update which cells are actually drawn after the cells are selected
     end
+
+
 
     function addBackgrounds(source,event)
         %addes the selected cells to the dropdown list of possible
