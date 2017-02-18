@@ -13,21 +13,21 @@ function bulkFret
     backgroundIDs=[];           %stores the IDs of the backgrounds.  A1=0,A2=1,B1=12, etc
     selectedCells=[];           %stores the selected cells in the same format as background IDs
     legendLables=cellList;
-    cellColors=rand(116,3)*0.8+ones(116,3)*0.1;
+    cellColors=randi([0 1], 116,3)*0.8+ones(116,3)*0.1;
 
     
     backgrounds=zeros(size(doubles,2)+1,1); %stores the background vectors such that the background for a cell is stored in the same column as the cell.  As initalized, will have no effect
     normalizations=ones(size(doubles,2)+1,1); %stores the normalization constants such that the appropriate constant is at the same column as the cell data.  As initalized, will have no effect.
     
-    file=''; % stores the file name to open
+    file=''; % stores the file name to open.
     path=''; % stores the file path.
     
     %Set up the UI
     
     %main window
-    mainWindow          = figure('Name','Bulk Fret','NumberTitle','off','Visible','on','Position',[25,25,1280,720],'ResizeFcn',@resizeWindow);
-    mainWindow.MenuBar  = 'none';
-    
+    mainWindow          = figure('Name','Bulk Fret','NumberTitle','off','Visible','on','Position',[25,25,1280,720],'ResizeFcn',@resizeWindow,'KeyPressFcn',@keyDownCallback);
+    set(mainWindow,'MenuBar','none')
+
     %file menu
     fileMenu            = uimenu('Label','File');
     uimenu(fileMenu,'Label','Open','Callback',@openFile);
@@ -61,8 +61,7 @@ function bulkFret
     captionEdit         = uicontrol('Style','edit','Position',[10,375,125,25],'HorizontalAlignment','left','Callback',@captionEdited);
     
     colorEdit           = uicontrol('Style','pushbutton','String','Edit color','Position',[150,375,125,25],'Callback',@changeColor);
-
-
+    
     function openFile(source,event)
         %Opens a dialog to select a file, then decodes it into a readable
         %a usable format.
@@ -112,7 +111,7 @@ function bulkFret
         
         newPos  = get(mainWindow,'Position');
         newSize = newPos(3:4);
-        if or(newSize(1)<5000,newSize(2)<200) % placeholder, replace with this https://www.mathworks.com/matlabcentral/fileexchange/38527-limit-figure-size eventually
+        if or(newSize(1)<500,newSize(2)<200) % placeholder, replace with this https://www.mathworks.com/matlabcentral/fileexchange/38527-limit-figure-size eventually
             newSize=[1000,700];
             newPos=[newPos(1:2),newSize];
             set(mainWindow,'Position',newPos);
@@ -218,7 +217,7 @@ function bulkFret
         tempList=event.Indices;
         selectedCells=zeros(size(tempList,1),1);
         
-        cellBackgrounds=[];
+        cellBackgrounds=-1*ones
         for i=1:size(selectedCells,1)
             selectedCells(i)=12*(tempList(i,1)-1)+(tempList(i,2)-1); % actually builds up selectedCells, arguably the main job of this function
             %The rest of this loop and the next if statement are dedicated
@@ -230,6 +229,9 @@ function bulkFret
             end
             cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
+        
+        
+        
         if and(size(cellBackgrounds,1)==1,size(find(backgroundIDs==cellBackgrounds,1),1))
             set(useBackgrounds,'Value',1+find(backgroundIDs==cellBackgrounds,1))
         else
@@ -246,7 +248,7 @@ function bulkFret
                 backgroundIDs=[backgroundIDs;selectedCells(i)];
             end
         end
-        backgroundIDs=sort(backgroundIDs,1)
+        backgroundIDs=sort(backgroundIDs,1);
         backgroundsStrings={'--'};
         for i=1:size(backgroundIDs,1)
             backgroundStrings(i+1)=cellList(backgroundIDs(i)+1);
@@ -285,6 +287,14 @@ function bulkFret
     
     function exportImage(source,event)
         tempFigure=figure();
-        tempGraph=axes('Units','Pixels','Parent',mainWindow);
+        tempGraph=axes('Units','Pixels','Parent',tempFigure);
+        drawCells(selectedCells,tempGraph);
+        print(tempFigure,'exportedGraph','-dpng');
+        close(tempFigure);
     end
+    
+    function keyDownCallback(source,event)
+        disp(event.Key)
+    end
+
 end

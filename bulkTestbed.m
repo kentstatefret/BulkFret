@@ -1,1 +1,3 @@
-rand(20,3)*.6+ones(20,3)*0.2
+
+
+size(find(tempBackgrounds==cellBackgrounds,1),1)
