@@ -8,7 +8,7 @@ function bulkFret
     %^ stores the cell strings in a 1d array.
 
     
-    doubles=zeros(116,99);      %stores data in a readable format.  May need to change how sizing this is handled in the future.
+    doubles=zeros(1,99);      %stores data in a readable format.  May need to change how sizing this is handled in the future.
     backgroundsStrings={'  '};  %hold list of backgrounds in human readable format
     backgroundIDs=[];           %stores the IDs of the backgrounds.  A1=0,A2=1,B1=12, etc
     selectedCells=[];           %stores the selected cells in the same format as background IDs
@@ -26,7 +26,7 @@ function bulkFret
     
     %main window
     mainWindow          = figure('Name','Bulk Fret','NumberTitle','off','Visible','on','Position',[25,25,1280,720],'ResizeFcn',@resizeWindow,'KeyPressFcn',@keyDownCallback);
-    set(mainWindow,'MenuBar','none')
+    set(mainWindow,'MenuBar','none');
 
     %file menu
     fileMenu            = uimenu('Label','File');
@@ -64,7 +64,7 @@ function bulkFret
     
     function openFile(source,event)
         %Opens a dialog to select a file, then decodes it into a readable
-        %a usable format.
+        %format.
         
         [file,path]=uigetfile({'*.xls';'*.*'},'File Selector');
         fid=fopen(strcat(path,file));
