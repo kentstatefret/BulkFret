@@ -133,6 +133,7 @@ function bulkFret
     end
 
     function data=normalizeAndBackgroundSubtract(input,cells,n,b)
+        %preprocesses the data before render/export.  
         data=input;  %data is what eventually get's output.
         if b %subtracts the backgrounds from the data
             for i=1:size(cells,1)
@@ -141,12 +142,13 @@ function bulkFret
                 end
             end
         end
-        n
         if n %multiplies the vectors by the normalization scalers.
             for i=1:size(cells,1)
                 data(1:end,cells(i)+3)=normalizations(cells(i)+3,1)*data(1:end,cells(i)+3);
             end
         end
+        %NEED TO SWITCH NORMALIZATION VALUES DEPENDING ON WHETHER THE
+        %BACKGROUND IS SUBTRACTED.
     end
 
     function drawCells(cells,ax)
@@ -278,6 +280,7 @@ function bulkFret
     end
     
     function captionEdited(source,event)
+        %allows the user to edit the caption for the selected line(s)
         for i=1:size(selectedCells,1)
             legendLables{selectedCells(i)+1}=get(source,'String');
         end
@@ -285,6 +288,7 @@ function bulkFret
     end
     
     function changeColor(source,event)
+        %allows the user to pick a color to for the selected line(s)
         color=uisetcolor([0,0,0]);
         for i=1:size(selectedCells,1)
             cellColors(selectedCells(i)+1,1:end)=color;
@@ -293,6 +297,7 @@ function bulkFret
     end
     
     function exportImage(source,event)
+        %exports a PNG of whats being rendered on the graph.
         [iFile,iPath]=uiputfile({'*.png';'*.*'},'Export Image');
         tempFigure=figure('Position',get( 0, 'Screensize' )); %may not work for multi-monitor
         tempGraph=axes('Units','Pixels','Parent',tempFigure);
@@ -305,13 +310,13 @@ function bulkFret
     end
     
     function exportCSV(source,event)
+        %exports a csv _all_ of the data, with background subtraction and
+        %normalization done if the boxes are checked.
         [cFile,cPath]=uiputfile({'*.csv';'*.*'},'Export csv');
-        data=normalizeAndBackgroundSubtract(doubles,(0:95).',get(backgroundEnable,'Value'),get(normEnable,'Value'));
+        data=normalizeAndBackgroundSubtract(doubles,(0:95).',get(normEnable,'Value'),get(backgroundEnable,'Value'));
         try
             csvwrite([cPath,cFile],data);
-        end
-        
-        
+        end  
     end
 
     function keyDownCallback(source,event)
@@ -319,7 +324,8 @@ function bulkFret
     end
 
     function norms=getNormalizationValues(data,bckgrnd)
-        norms=ones(size(data,1),2);    %placeholder, do not use.
+        %calculates the normalization scalers
+        norms=ones(size(data,1),2);
         for i=3:99
             j=normRanges(i,1);
             k=normRanges(i,2);
@@ -347,6 +353,7 @@ function bulkFret
     end
 
     function graphClickCallback(source,event)
+        %used to select the region to use for normalization.
         [X,Y]=ginput(2);
         [index1, index1]=min(abs(doubles(1:end,1)-X(1)));
         [index2, index2]=min(abs(doubles(1:end,1)-X(2)));
