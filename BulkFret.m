@@ -237,12 +237,15 @@ function bulkFret
 
             cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
-        if size(backgroundIDs,1)>0
+        tempBckGrdIDs=backgroundIDs;
+        if size(backgroundIDs,1)>size(cellBackgrounds,1)
             cellBackgrounds(size(backgroundIDs,1),1)=0;
+        elseif size(backgroundIDs,1)<size(cellBackgrounds,1)
+            tempBckGrdIDs(size(cellBackgrounds,1))=0;
         end
-
-        if and(size(cellBackgrounds,1)==1,size(find(backgroundIDs==cellBackgrounds,1),1))
-            set(useBackgrounds,'Value',1+find(backgroundIDs==cellBackgrounds,1))
+        
+        if and(size(cellBackgrounds,1)==1,size(find(tempBckGrdIDs==cellBackgrounds,1),1))
+            set(useBackgrounds,'Value',1+find(tempBckGrdIDs==cellBackgrounds,1))
         else
             set(useBackgrounds,'Value',1);
         end

@@ -147,7 +147,8 @@ function bulkFret
                 data(1:end,cells(i)+3)=normalizations(cells(i)+3,1)*data(1:end,cells(i)+3);
             end
         end
-        %NEED TO SWITCH NORM
+        %NEED TO SWITCH NORMALIZATION VALUES DEPENDING ON WHETHER THE
+        %BACKGROUND IS SUBTRACTED.
     end
 
     function drawCells(cells,ax)
@@ -236,10 +237,17 @@ function bulkFret
 
             cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
-        if size(backgroundIDs,1)>0
+        tempBckGrdIDs=[];
+        if size(backgroundIDs,1)>size(cellBackgrounds,1)
             cellBackgrounds(size(backgroundIDs,1),1)=0;
+        elseif size(backgroundIDs,1)<size(cellBackgrounds,1)
+            temp
         end
+        
 
+        backgroundIDs
+        cellBackgrounds
+        
         if and(size(cellBackgrounds,1)==1,size(find(backgroundIDs==cellBackgrounds,1),1))
             set(useBackgrounds,'Value',1+find(backgroundIDs==cellBackgrounds,1))
         else
