@@ -1,3 +1,5 @@
-a=[1,2,3,5,7,11,13]
-b=11;
-find(a==b)
+x = 0:pi/100:2*pi;
+y = sin(x);
+
+figure % opens new figure window
+plot(x,y)
