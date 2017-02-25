@@ -1,5 +1,5 @@
 function bulkFret
-    clc
+    clc %Because I only want errors from _the most recent version_ showing up.
     
     cellTable={'A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12';'B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12';'C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12';'D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12';'E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12';'F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12';'G1','G2','G3','G4','G5','G6','G7','G8','G9','G10','G11','G12';'H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12'};
     %^ stores the cell scrings in the format used by the selector table, a
@@ -29,15 +29,20 @@ function bulkFret
     
     %main window
     mainWindow          = figure('Name','Bulk Fret','NumberTitle','off','Visible','on','Position',[25,25,1280,720],'ResizeFcn',@resizeWindow,'KeyPressFcn',@keyDownCallback);
+    
+    %Gets some of the icons used in the default toolbar.
     openImg             = get(findall(mainWindow,'ToolTipString','Open File'),'CData');
     saveImg             = get(findall(mainWindow,'ToolTipString','Save Figure'),'CData');
     ZoomInImg           = get(findall(mainWindow,'ToolTipString','Zoom In'),'CData');
     ZoomOutImg          = get(findall(mainWindow,'ToolTipString','Zoom Out'),'CData');
     PanImg              = get(findall(mainWindow,'ToolTipString','Pan'),'CData');
     
-    set(mainWindow,'MenuBar','none');
+    set(mainWindow,'MenuBar','none'); %Deletes the default menus and toolbar.
     
-    toolBar=uitoolbar(mainWindow);
+    
+    toolBar=uitoolbar(mainWindow); %Creates a new toolbar to populate with the buttons we actually want.
+    
+    %populates the toolbar.
     openButton          = uipushtool(toolBar,'CData',openImg,'ToolTipString','Open File','ClickedCallback',@openFile);
     saveButton          = uipushtool(toolBar,'CData',saveImg,'ToolTipString','Save CSV','ClickedCallback',@exportCSV);
     zoomInButton        = uitoggletool(toolBar,'CData',ZoomInImg,'ToolTipString','Zoom In','Separator','on','ClickedCallback',@zoomCallback);
@@ -46,10 +51,9 @@ function bulkFret
 
     %file menu
     fileMenu            = uimenu('Label','File');
-    uimenu(fileMenu,'Label','Open','Callback',@openFile);
-    uimenu(fileMenu,'Label','Save CSV','Callback',@exportCSV);
-    uimenu(fileMenu,'Label','Export Image','Callback',@exportImage)
-    uimenu(fileMenu,'Label','Quit','Callback','disp(''exit'')');
+    openMenu            = uimenu(fileMenu,'Label','Open','Callback',@openFile);
+    saveMenu            = uimenu(fileMenu,'Label','Save CSV','Callback',@exportCSV);
+    exportMenu          = uimenu(fileMenu,'Label','Export Image','Callback',@exportImage);
     
     %view menu
     viewMenu            = uimenu('Label','View');
@@ -98,9 +102,21 @@ function bulkFret
     
     colorEdit           = uicontrol('Style','pushbutton','String','Edit color','Position',[150,375,125,25],'Callback',@changeColor);
     
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %       Helper functions     %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     function data=normalizeAndBackgroundSubtract(input,cells,n,b)
-        %preprocesses the data before render/export.  
-        data=input;  %data is what eventually get's output.
+        
+        % Returns a version of input with the backgrounds subtracted and
+        % normalization applies, as specified by n and b.
+        %
+        % input := The unprocessed data, as a matrix
+        % cells := The a matrix specifying the cells to process. 
+        % n     := Boolean specifying whether to normalize the data.
+        % b     := Boolean specifying whether to subtract backgrounds.
+        
+        data=input;  %If n and b are both false, we want to return input as is.
         if b %subtracts the backgrounds from the data
             for i=1:size(cells,1)
                 if backgrounds(cells(i)+1)~=0
@@ -109,7 +125,7 @@ function bulkFret
             end
         end
         if n %multiplies the vectors by the normalization scalers.
-            if b 
+            if b %which normalization values we use depends 
                 for i=1:size(cells,1)
                     data(1:end,cells(i)+3)=normalizations(cells(i)+3,1)*data(1:end,cells(i)+3);
                 end
@@ -119,25 +135,30 @@ function bulkFret
                 end
             end
         end
-        %NEED TO SWITCH NORMALIZATION VALUES DEPENDING ON WHETHER THE
-        %BACKGROUND IS SUBTRACTED.
     end
 
     function norms=getNormalizationValues(data,bckgrnd)
-        %calculates the normalization scalers
-        norms=ones(size(data,1),2);
+        
+        % Returns a 96x2 matrix of positive normalization scalers, to be
+        % used for later processing.
+        %
+        % data    := the raw data to use.
+        % bckgrnd := the backgrounds to subtract.
+        
+        norms=ones(size(data,1),2); %A normalization value of one has no effect, so if that's the default value
         for i=3:99
-            j=normRanges(i,1);
+            j=normRanges(i,1); % normRange specifies which wavelengths to use in normalizations
             k=normRanges(i,2);
-            if (j+k~=0)
-                xMin=doubles(j,1);
-                xMax=doubles(k,1);
+            if (j+k~=0) %Don't modify the normalization values if there's no normalization range.
+                xMin=data(j,1);
+                xMax=data(k,1);
+                
                 fit=polyfit(data(j:k,1),data(j:k,i),2);
                 a=fit(1);
                 b=fit(2);
                 c=fit(3);
-                if (a<0 && c-b*b/(4*a)>0)
-                    if xMin>-b/(2*a)
+                if (a<0 && c-b*b/(4*a)>0) % Verify the parabola is downward opening (i.e. it's a max, not a min) and vertex above the x axis.
+                    if xMin>-b/(2*a) %Only want to use the vertex of the parabola if it's actually in the normalization range.
                         norms(i,1)=a*xMin*xMin+b*xMin+c;
                     elseif xMax<-b/(2*a)
                         norms(i,1)=a*xMax*xMax+b*xMax+c;
@@ -145,6 +166,9 @@ function bulkFret
                         norms(i,1)=1/(c-b*b/(4*a));
                     end
                 end
+                
+                %repeats following lines, but for the background subtracted
+                %version of the data.
                 fit=polyfit(data(j:k,1),data(j:k,i)-bckgrnd(j:k,i),2);
                 a=fit(1);
                 b=fit(2);
@@ -162,6 +186,88 @@ function bulkFret
         end
     end
 
+    function drawCells(cells,ax)
+        
+        % Draws specified cells to a specified axes.
+        % 
+        % cells := a matrix identifying the cells to draw.
+        % ax    := the axes to draw too.
+        
+        
+        data=normalizeAndBackgroundSubtract(doubles,cells,get(normEnable,'Value'),get(backgroundEnable,'Value'));
+        
+        X=data(1:end,1); %the wavelengths are stored in the first column
+        Xi=min(X):0.2:max(X); % produces a more precise x axis for the smoothing function
+        
+        labels={};
+        plots=[];
+        
+        yMin=0;
+        yMax=0;
+        
+        cla(graph) %wipes the graph before drawing the selected cells
+        
+        
+        for i=1:size(cells,1)
+            
+            Y=data(1:end,cells(i)+3);
+            if sum(Y)~=0
+                hold on
+                if graphStyle(1)
+                    plots(i)=scatter(ax,X,Y,6,cellColors(cells(i)+1,1:end));
+                end
+                if graphStyle(2)
+                    if graphStyle(3)
+                        Yi=pchip(X,Y,Xi); %creates smoothed version of the Y data
+                        plots(i)=plot(ax,Xi,Yi,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
+                    else
+                        plots(i)=plot(ax,X,Y,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
+                    end
+                end
+
+                hold off
+            end
+            if sum(data(1:end,cells(i)+3))~=0
+                labels(i)=legendLables(cells(i)+1);
+            end
+            
+            %Determine the range of th plotted values
+            Max=max(data(1:end,cells(i)+3));
+            Min=min(data(1:end,cells(i)+3));
+            if Max>yMax
+                yMax=Max;
+            end
+            if Min<yMin
+                yMin=Min;
+            end
+        end
+        
+        %sets up the scaling of the graph such that covers the domain and
+        %range of the data, but not more.
+        bufferSize=0.05;
+        set(graph,'Xlim',[min(X),max(X)])
+        if yMin<yMax
+            set(ax,'Ylim',[yMin-bufferSize*(yMax-yMin),(1+bufferSize)*yMax-bufferSize*yMin])
+        else
+            set(ax,'Ylim',[yMin-bufferSize,(1+bufferSize)])
+        end
+        
+        if size(labels,1)>0
+            legend(ax,'show')
+            legend(ax,plots,labels);
+        else
+            legend(ax,'off')
+        end
+        
+        %Labels the axes
+        set(get(ax,'XLabel'),'String','Wavelength');
+        set(get(ax,'YLabel'),'String','Intensity');
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %          Callbacks         %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     function openFile(source,event)
         %Opens a dialog to select a file, then decodes it into a readable
         %format.
@@ -236,82 +342,6 @@ function bulkFret
             set(captionEdit,'Position',[10,375+delSize(2),125,25]);
             set(colorEdit,'Position',[150,375+delSize(2),125,25]);
         end    
-    end
-
-    function drawCells(cells,ax)
-        %backend function to draw the cells specified by "cells" to the
-        %figure.  Should be called after most updates.
-        
-        %Need these two to know how to draw the plots.
-        
-        data=normalizeAndBackgroundSubtract(doubles,cells,get(normEnable,'Value'),get(backgroundEnable,'Value'));
-        
-        X=data(1:end,1); %the wavelengths are stored in the first column
-        Xi=min(X):0.2:max(X); % produces a more precise x axis for the smoothing function
-        
-        labels={};
-        plots=[];
-        
-        yMin=0;
-        yMax=0;
-        
-        cla(graph) %wipes the graph before drawing the selected cells
-        
-        
-        for i=1:size(cells,1)
-            
-            Y=data(1:end,cells(i)+3);
-            if sum(Y)~=0
-                hold on
-                if graphStyle(1)
-                    plots(i)=scatter(ax,X,Y,6,cellColors(cells(i)+1,1:end));
-                end
-                if graphStyle(2)
-                    if graphStyle(3)
-                        Yi=pchip(X,Y,Xi); %creates smoothed version of the Y data
-                        plots(i)=plot(ax,Xi,Yi,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
-                    else
-                        plots(i)=plot(ax,X,Y,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
-                    end
-                end
-
-                hold off
-            end
-            if sum(data(1:end,cells(i)+3))~=0
-                labels(i)=legendLables(cells(i)+1);
-            end
-            
-            %Determine the range of th plotted values
-            Max=max(data(1:end,cells(i)+3));
-            Min=min(data(1:end,cells(i)+3));
-            if Max>yMax
-                yMax=Max;
-            end
-            if Min<yMin
-                yMin=Min;
-            end
-        end
-        
-        %sets up the scaling of the graph such that covers the domain and
-        %range of the data, but not more.
-        bufferSize=0.05;
-        set(graph,'Xlim',[min(X),max(X)])
-        if yMin<yMax
-            set(ax,'Ylim',[yMin-bufferSize*(yMax-yMin),(1+bufferSize)*yMax-bufferSize*yMin])
-        else
-            set(ax,'Ylim',[yMin-bufferSize,(1+bufferSize)])
-        end
-        
-        if size(labels,1)>0
-            legend(ax,'show')
-            legend(ax,plots,labels);
-        else
-            legend(ax,'off')
-        end
-        
-        %Labels the axes
-        set(get(ax,'XLabel'),'String','Wavelength');
-        set(get(ax,'YLabel'),'String','Intensity');
     end
 
     function drawCellsCallback(source,event)
@@ -442,32 +472,40 @@ function bulkFret
     end
 
     function drawScatterCallback(source,event)
+    % Toggles drawing the data points as a scatter plot.    
+    
         if graphStyle(1)
             graphStyle(1)=0;
             set(drawScatter,'Checked','off')
+            
+            %Need to make sure that the lines are on or the scatter is.
             graphStyle(2)=1;
             set(drawLines,'Checked','on')
         else
             graphStyle(1)=1;
             set(drawScatter,'Checked','on')
         end
-        drawCells(selectedCells,graph);
+        drawCells(selectedCells,graph); %Updates the graph
     end
 
     function drawLinesCallback(source,event)
+        % Toggles drawing lines between the data points.
         if graphStyle(2)
             graphStyle(2)=0;
             set(drawLines,'Checked','off')
+            
+            %Need to make sure that the lines are on or the scatter is.
             graphStyle(1)=1;
             set(drawScatter,'Checked','on')
         else
             graphStyle(2)=1;
             set(drawLines,'Checked','on')
         end
-        drawCells(selectedCells,graph);  
+        drawCells(selectedCells,graph); %Updates the graph
     end
 
     function smoothLinesCallback(source,event)
+        % Toogles smoothing of the lines.
         if graphStyle(3)
             graphStyle(3)=0;
             set(smoothLines,'Checked','off')
@@ -479,6 +517,10 @@ function bulkFret
     end
 
     function zoomCallback(source,event)
+        
+        %Changes the zoom mode based on the users selection from the
+        %toolbar.
+        
         toggle   = strcmp(get(source,'State'),'on');
         inButton = strcmp(get(source,'Separator'),'on');
         if inButton 
@@ -498,7 +540,9 @@ function bulkFret
             end
             set(zoomInButton,'State','off')
         end
-        set(PanButton,'State','off')
+        
+        %Pan and zoom must be mutually exclusive.
+        set(PanButton,'State','off') 
         pan off;
     end
 
@@ -509,8 +553,11 @@ function bulkFret
         else
             pan off
         end
+        
+        %Pan and zoom must be mutually exclusive.
         zoom off
         set(zoomInButton,'State','off')
         set(zoomOutButton,'State','off')
     end
+
 end

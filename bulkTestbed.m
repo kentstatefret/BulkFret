@@ -1,5 +1,3 @@
-x = 0:pi/100:2*pi;
-y = sin(x);
+a={'one','two','three';'a','b','c'}
 
-figure % opens new figure window
-plot(x,y)
+b=reshape(a,[1,size(a,1)*size(a,2)])
