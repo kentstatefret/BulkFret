@@ -9,18 +9,19 @@ function bulkFret
 
     
     doubles=zeros(1,99);      %stores data in a readable format.  May need to change how sizing this is handled in the future.
+    backgrounds=[]; %stores the background vectors such that the background for a cell is stored in the same column as the cell.  As initalized, will have no effect
+    normalizations=ones(size(doubles,2)+1,1); %stores the normalization constants such that the appropriate constant is at the same column as the cell data.  As initalized, will have no effect.
+    normRanges=zeros(99,2);
+
     backgroundsStrings={'  '};  %hold list of backgrounds in human readable format
     backgroundIDs=[];           %stores the IDs of the backgrounds.  A1=0,A2=1,B1=12, etc
     selectedCells=[];           %stores the selected cells in the same format as background IDs
     
     legendLables=cellList;
     cellColors=repmat([0,0,0;0,0,1;0,1,0;0,1,1;1,0,0;1,0,1;1,1,0;1,1,1]/2+ones(8,3)/4,12,1); %Default color scheme.
-    graphStyle=[0,1,1];
+    graphStyle=[0,1,1]; %stores the style to be used in plotting.  Format is [points,lines,smoothed].
     
-    backgrounds=[]; %stores the background vectors such that the background for a cell is stored in the same column as the cell.  As initalized, will have no effect
-    normalizations=ones(size(doubles,2)+1,1); %stores the normalization constants such that the appropriate constant is at the same column as the cell data.  As initalized, will have no effect.
-    
-    normRanges=zeros(99,2);
+
     file=''; % stores the file name to open.
     path=''; % stores the file path.
     
@@ -39,9 +40,27 @@ function bulkFret
     
     %view menu
     viewMenu            = uimenu('Label','View');
-    drawScatter         = uimenu(viewMenu,'Label','Draw Data Points','Checked','off','Callback',@drawScatterCallback);
-    drawLines           = uimenu(viewMenu,'Label','Draw Lines','Checked','on','Callback',@drawLinesCallback);
-    smoothLines         = uimenu(viewMenu,'Label','Smooth Lines','Checked','on','Callback',@smoothLinesCallback);
+    drawScatter         = uimenu(viewMenu,'Label','Draw Data Points','Callback',@drawScatterCallback);
+    drawLines           = uimenu(viewMenu,'Label','Draw Lines','Callback',@drawLinesCallback);
+    smoothLines         = uimenu(viewMenu,'Label','Smooth Lines','Callback',@smoothLinesCallback);
+    
+    %Following if statements ensure that the check marks on the menu match
+    %the initial values for graphStyle.
+    if graphStyle(1)
+       set(drawScatter,'Checked','on') 
+    else
+       set(drawScatter,'Checked','off') 
+    end
+    if graphStyle(2)
+       set(drawLines,'Checked','on') 
+    else
+       set(drawLines,'Checked','off') 
+    end
+    if graphStyle(3)
+       set(smoothLines,'Checked','on') 
+    else
+       set(smoothLines,'Checked','off') 
+    end
     
     %cell select table
     table               = uitable(mainWindow,'Data',cellTable,'Position',[10,530,332,168],'ColumnWidth',{25,25,25,25,25,25,25,25,25,25,25,25},'CellSelectionCallback',@CellSelection,'Enable','off');
@@ -109,7 +128,7 @@ function bulkFret
                 end
             end
         else
-            doubles=csvread([path,file],2,0);
+            doubles=csvread([path,file],1,0);
         end
         backgrounds=zeros(size(doubles));
         
@@ -173,6 +192,7 @@ function bulkFret
         Xi=min(X):0.2:max(X); % produces a more precise x axis for the smoothing function
         
         labels={};
+        plots=[];
         
         yMin=0;
         yMax=0;
@@ -187,14 +207,14 @@ function bulkFret
                 hold on
                 
                 if graphStyle(1)
-                    scatter(ax,X,Y,6,cellColors(cells(i)+1,1:end));
+                    plots(i)=scatter(ax,X,Y,6,cellColors(cells(i)+1,1:end));
                 end
                 if graphStyle(2)
                     if graphStyle(3)
                         Yi=pchip(X,Y,Xi); %creates smoothed version of the Y data
-                        plot(ax,Xi,Yi,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
+                        plots(i)=plot(ax,Xi,Yi,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
                     else
-                        plot(ax,X,Y,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
+                        plots(i)=plot(ax,X,Y,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
                     end
                 end
 
@@ -227,7 +247,7 @@ function bulkFret
         
         if size(labels,1)>0
             legend(ax,'show')
-            legend(ax,labels);
+            legend(ax,plots,labels);
         else
             legend(ax,'off')
         end
