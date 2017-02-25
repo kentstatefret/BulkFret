@@ -15,7 +15,7 @@ function bulkFret
     
     legendLables=cellList;
     cellColors=repmat([0,0,0;0,0,1;0,1,0;0,1,1;1,0,0;1,0,1;1,1,0;1,1,1]/2+ones(8,3)/4,12,1); %Default color scheme.
-    graphStyle=[1,0,1];
+    graphStyle=[0,1,1];
     
     backgrounds=[]; %stores the background vectors such that the background for a cell is stored in the same column as the cell.  As initalized, will have no effect
     normalizations=ones(size(doubles,2)+1,1); %stores the normalization constants such that the appropriate constant is at the same column as the cell data.  As initalized, will have no effect.
@@ -39,7 +39,9 @@ function bulkFret
     
     %view menu
     viewMenu            = uimenu('Label','View');
-    uimenu(viewMenu,'Label','Quit','Callback','disp(''exit'')');
+    drawScatter         = uimenu(viewMenu,'Label','Draw Data Points','Checked','off','Callback',@drawScatterCallback);
+    drawLines           = uimenu(viewMenu,'Label','Draw Lines','Checked','on','Callback',@drawLinesCallback);
+    smoothLines         = uimenu(viewMenu,'Label','Smooth Lines','Checked','on','Callback',@smoothLinesCallback);
     
     %cell select table
     table               = uitable(mainWindow,'Data',cellTable,'Position',[10,530,332,168],'ColumnWidth',{25,25,25,25,25,25,25,25,25,25,25,25},'CellSelectionCallback',@CellSelection,'Enable','off');
@@ -391,4 +393,41 @@ function bulkFret
         normalizations=getNormalizationValues(doubles,backgrounds);
         drawCells(selectedCells,graph);
     end
+
+    function drawScatterCallback(source,event)
+        if graphStyle(1)
+            graphStyle(1)=0;
+            set(drawScatter,'Checked','off')
+            graphStyle(2)=1;
+            set(drawLines,'Checked','on')
+        else
+            graphStyle(1)=1;
+            set(drawScatter,'Checked','on')
+        end
+        drawCells(selectedCells,graph);
+    end
+
+    function drawLinesCallback(source,event)
+        if graphStyle(2)
+            graphStyle(2)=0;
+            set(drawLines,'Checked','off')
+            graphStyle(1)=1;
+            set(drawScatter,'Checked','on')
+        else
+            graphStyle(2)=1;
+            set(drawLines,'Checked','on')
+        end
+        drawCells(selectedCells,graph);  
+    end
+
+    function smoothLinesCallback(source,event)
+        if graphStyle(3)
+            graphStyle(3)=0;
+            set(smoothLines,'Checked','off')
+        else
+            graphStyle(3)=1;
+            set(smoothLines,'Checked','on')
+        end
+        drawCells(selectedCells,graph);  
+    end   
 end
