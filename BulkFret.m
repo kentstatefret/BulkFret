@@ -281,6 +281,7 @@ function bulkFret
             backgrounds(selectedCells(i)+1)=backgroundID;
         end
         drawCells(selectedCells,graph)
+        normalizations=getNormalizationValues(doubles,backgrounds);
     end
     
     function captionEdited(source,event)
@@ -373,7 +374,7 @@ function bulkFret
             normRanges(selectedCells(i)+3,1)=index1;
             normRanges(selectedCells(i)+3,2)=index2;
         end
-        normalizations=getNormalizationValues(doubles,backgrounds)
-        drawCells(selectedCells,graph)
+        normalizations=getNormalizationValues(doubles,backgrounds);
+        drawCells(selectedCells,graph);
     end
 end
