@@ -377,20 +377,33 @@ function bulkFret
             j=normRanges(i,1);
             k=normRanges(i,2);
             if (j+k~=0)
+                xMin=doubles(j,1);
+                xMax=doubles(k,1);
                 fit=polyfit(data(j:k,1),data(j:k,i),2);
                 a=fit(1);
                 b=fit(2);
                 c=fit(3);
-
                 if (a<0 && c-b*b/(4*a)>0)
-                    norms(i,1)=1/(c-b*b/(4*a));
+                    if xMin>-b/(2*a)
+                        norms(i,1)=a*xMin*xMin+b*xMin+c;
+                    elseif xMax<-b/(2*a)
+                        norms(i,1)=a*xMax*xMax+b*xMax+c;
+                    else
+                        norms(i,1)=1/(c-b*b/(4*a));
+                    end
                 end
                 fit=polyfit(data(j:k,1),data(j:k,i)-bckgrnd(j:k,i),2);
                 a=fit(1);
                 b=fit(2);
                 c=fit(3);
                 if (a<0 && c-b*b/(4*a)>0)
-                    norms(i,2)=1/(c-b*b/(4*a));
+                    if xMin>-b/(2*a)
+                        norms(i,1)=a*xMin*xMin+b*xMin+c;
+                    elseif xMax<-b/(2*a)
+                        norms(i,1)=a*xMax*xMax+b*xMax+c;
+                    else
+                        norms(i,1)=1/(c-b*b/(4*a));
+                    end
                 end
             end
         end

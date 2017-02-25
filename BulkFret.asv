@@ -40,10 +40,27 @@ function bulkFret
     
     %view menu
     viewMenu            = uimenu('Label','View');
-    drawScatter         = uimenu(viewMenu,'Label','Draw Data Points','Checked','off','Callback',@drawScatterCallback);
-    drawLines           = uimenu(viewMenu,'Label','Draw Lines','Checked','on','Callback',@drawLinesCallback);
-    smoothLines         = uimenu(viewMenu,'Label','Smooth Lines','Checked','on','Callback',@smoothLinesCallback);
-    if
+    drawScatter         = uimenu(viewMenu,'Label','Draw Data Points','Callback',@drawScatterCallback);
+    drawLines           = uimenu(viewMenu,'Label','Draw Lines','Callback',@drawLinesCallback);
+    smoothLines         = uimenu(viewMenu,'Label','Smooth Lines','Callback',@smoothLinesCallback);
+    
+    %Following if statements ensure that the check marks on the menu match
+    %the initial values for graphStyle.
+    if graphStyle(1)
+       set(drawScatter,'Checked','on') 
+    else
+       set(drawScatter,'Checked','off') 
+    end
+    if graphStyle(2)
+       set(drawLines,'Checked','on') 
+    else
+       set(drawLines,'Checked','off') 
+    end
+    if graphStyle(3)
+       set(smoothLines,'Checked','on') 
+    else
+       set(smoothLines,'Checked','off') 
+    end
     
     %cell select table
     table               = uitable(mainWindow,'Data',cellTable,'Position',[10,530,332,168],'ColumnWidth',{25,25,25,25,25,25,25,25,25,25,25,25},'CellSelectionCallback',@CellSelection,'Enable','off');
@@ -360,6 +377,8 @@ function bulkFret
             j=normRanges(i,1);
             k=normRanges(i,2);
             if (j+k~=0)
+                doubles(1,j)
+                doubles(1,k)
                 fit=polyfit(data(j:k,1),data(j:k,i),2);
                 a=fit(1);
                 b=fit(2);
