@@ -1,10 +1,5 @@
-function myTest
-    f=figure
+a={'Alpha','Bravo'};
+b={'Charlie','Delta'};
 
-    check=uicontrol('Style','checkbox')
-    test=uicontrol('Style','pushbutton','Position',[100,100,100,25],'Callback',@button)
-
-    function button(src,evnt)
-        get(check,'Value')
-    end
-end
+C=[a,b];
+C

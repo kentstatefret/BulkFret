@@ -317,9 +317,15 @@ function bulkFret
         %normalization done if the boxes are checked.
         [cFile,cPath]=uiputfile({'*.csv';'*.*'},'Export csv');
         data=normalizeAndBackgroundSubtract(doubles,(0:95).',get(normEnable,'Value'),get(backgroundEnable,'Value'));
+        commaHeader = [[{'Wavelength','Temperature'},cellList];repmat({','},1,numel([{'Wavelength','Temperature'},cellList]))];
+        commaHeader = commaHeader(:)';
+        header=cell2mat(commaHeader)
         try
-            csvwrite([cPath,cFile],data);
-        end  
+            fid=fopen([cPath,cFile],'w');
+            fprintf(fid,'%s\n',header);
+            fclose(fid);
+            dlmwrite([cPath,cFile],data,'-append');
+        end
     end
 
     function keyDownCallback(source,event)
