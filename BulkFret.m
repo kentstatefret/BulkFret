@@ -172,8 +172,14 @@ function bulkFret
             end
         end
         if n %multiplies the vectors by the normalization scalers.
-            for i=1:size(cells,1)
-                data(1:end,cells(i)+3)=normalizations(cells(i)+3,1)*data(1:end,cells(i)+3);
+            if b 
+                for i=1:size(cells,1)
+                    data(1:end,cells(i)+3)=normalizations(cells(i)+3,1)*data(1:end,cells(i)+3);
+                end
+            else
+                for i=1:size(cells,1)
+                    data(1:end,cells(i)+3)=normalizations(cells(i)+3,1)*data(1:end,cells(i)+3);
+                end
             end
         end
         %NEED TO SWITCH NORMALIZATION VALUES DEPENDING ON WHETHER THE
