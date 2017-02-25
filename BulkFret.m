@@ -12,9 +12,10 @@ function bulkFret
     backgroundsStrings={'  '};  %hold list of backgrounds in human readable format
     backgroundIDs=[];           %stores the IDs of the backgrounds.  A1=0,A2=1,B1=12, etc
     selectedCells=[];           %stores the selected cells in the same format as background IDs
+    
     legendLables=cellList;
     cellColors=repmat([0,0,0;0,0,1;0,1,0;0,1,1;1,0,0;1,0,1;1,1,0;1,1,1]/2+ones(8,3)/4,12,1); %Default color scheme.
-
+    graphStyle=[1,0,1];
     
     backgrounds=[]; %stores the background vectors such that the background for a cell is stored in the same column as the cell.  As initalized, will have no effect
     normalizations=ones(size(doubles,2)+1,1); %stores the normalization constants such that the appropriate constant is at the same column as the cell data.  As initalized, will have no effect.
@@ -171,12 +172,24 @@ function bulkFret
         
         cla(graph) %wipes the graph before drawing the selected cells
         
+        
         for i=1:size(cells,1)
             Y=data(1:end,cells(i)+3);
             if sum(Y)~=0
                 hold on
-                Yi=pchip(X,Y,Xi); %creates smoothed version of the Y data
-                plot(ax,Xi,Yi,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
+                
+                if graphStyle(1)
+                    scatter(ax,X,Y,6,cellColors(cells(i)+1,1:end));
+                end
+                if graphStyle(2)
+                    if graphStyle(3)
+                        Yi=pchip(X,Y,Xi); %creates smoothed version of the Y data
+                        plot(ax,Xi,Yi,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
+                    else
+                        plot(ax,X,Y,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
+                    end
+                end
+
                 hold off
             end  
         end
@@ -346,14 +359,14 @@ function bulkFret
                 b=fit(2);
                 c=fit(3);
 
-                if (a~=0 && c-b*b/(4*a)>0)
+                if (a<0 && c-b*b/(4*a)>0)
                     norms(i,1)=1/(c-b*b/(4*a));
                 end
                 fit=polyfit(data(j:k,1),data(j:k,i)-bckgrnd(j:k,i),2);
                 a=fit(1);
                 b=fit(2);
                 c=fit(3);
-                if (a~=0 && c-b*b/(4*a)>0)
+                if (a<0 && c-b*b/(4*a)>0)
                     norms(i,2)=1/(c-b*b/(4*a));
                 end
             end
