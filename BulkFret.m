@@ -245,11 +245,7 @@ function bulkFret
 
             cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
-        if size(backgroundIDs,1)>0
-            cellBackgrounds(size(backgroundIDs,1),1)=0;
-        end
-
-        if and(size(cellBackgrounds,1)==1,size(find(backgroundIDs==cellBackgrounds,1),1))
+        if size(cellBackgrounds,1)==1 && size(find(backgroundIDs==cellBackgrounds,1),1)
             set(useBackgrounds,'Value',1+find(backgroundIDs==cellBackgrounds,1))
         else
             set(useBackgrounds,'Value',1);
