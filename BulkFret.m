@@ -170,10 +170,16 @@ function bulkFret
         X=data(1:end,1); %the wavelengths are stored in the first column
         Xi=min(X):0.2:max(X); % produces a more precise x axis for the smoothing function
         
+        labels={};
+        
+        yMin=0;
+        yMax=0;
+        
         cla(graph) %wipes the graph before drawing the selected cells
         
         
         for i=1:size(cells,1)
+            
             Y=data(1:end,cells(i)+3);
             if sum(Y)~=0
                 hold on
@@ -191,15 +197,12 @@ function bulkFret
                 end
 
                 hold off
-            end  
-        end
-        
-        %sets up the scaling of the graph such that covers the domain and
-        %range of the data, but not more.
-        bufferSize=0.05;
-        yMin=0;
-        yMax=0;
-        for i=1:size(cells,1)
+            end
+            if sum(data(1:end,cells(i)+3))~=0
+                labels(i)=legendLables(cells(i)+1);
+            end
+            
+            %Determine the range of th plotted values
             Max=max(data(1:end,cells(i)+3));
             Min=min(data(1:end,cells(i)+3));
             if Max>yMax
@@ -209,6 +212,10 @@ function bulkFret
                 yMin=Min;
             end
         end
+        
+        %sets up the scaling of the graph such that covers the domain and
+        %range of the data, but not more.
+        bufferSize=0.05;
         set(graph,'Xlim',[min(X),max(X)])
         if yMin<yMax
             set(ax,'Ylim',[yMin-bufferSize*(yMax-yMin),(1+bufferSize)*yMax-bufferSize*yMin])
@@ -216,12 +223,6 @@ function bulkFret
             set(ax,'Ylim',[yMin-bufferSize,(1+bufferSize)])
         end
         
-        labels={};
-        for i=1:size(cells,1)
-            if sum(data(1:end,cells(i)+3))~=0
-                labels(i)=legendLables(cells(i)+1);
-            end
-        end
         if size(labels,1)>0
             legend(ax,'show')
             legend(ax,labels);
