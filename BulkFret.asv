@@ -67,40 +67,44 @@ function bulkFret
         %Opens a dialog to select a file, then decodes it into a readable
         %format.
         
-        [file,path]=uigetfile({'*.xls';'*.*'},'File Selector');
-        fid=fopen(strcat(path,file));
-        line = fgetl(fid);
-        lines = [];
-
-        while ischar(line)
-            lines{end+1,1} = line;
+        %[file,path]=uigetfile({'*.xls';'*.csv';'*.*'},'File Selector');
+        [file,path]=uigetfile({'*.xls:*.csv',},'File Selector');
+        if file(end-2:end)=='xls'
+            fid=fopen([path,file]);
             line = fgetl(fid);
-        end
-        fclose(fid);
-        cells=[];
+            lines = [];
 
-        for i=7:size(lines,1)-12
-            cLine=strsplit(char(lines(i)));
-            if size(cLine,2)==99
-                cells=[cells;cLine];
+            while ischar(line)
+                lines{end+1,1} = line;
+                line = fgetl(fid);
             end
-        end
+            fclose(fid);
+            cells=[];
 
-        for i=1:size(cells,1)
-            for j=1:size(cells,2)
-                if size(char(cells(i,j)),2)~=1
-                    raw=char(cells(i,j));
-                    striped=[];
-                    for k=1:size(raw,2)
-                        if rem(k,2)==0
-                            striped=[striped,raw(k)];
-                        end
-                    end
-                    doubles(i,j)=str2double(striped);
+            for i=7:size(lines,1)-12
+                cLine=strsplit(char(lines(i)));
+                if size(cLine,2)==99
+                    cells=[cells;cLine];
                 end
             end
+
+            for i=1:size(cells,1)
+                for j=1:size(cells,2)
+                    if size(char(cells(i,j)),2)~=1
+                        raw=char(cells(i,j));
+                        striped=[];
+                        for k=1:size(raw,2)
+                            if rem(k,2)==0
+                                striped=[striped,raw(k)];
+                            end
+                        end
+                        doubles(i,j)=str2double(striped);
+                    end
+                end
+            end
+        else
+            doubles=csvread([path,file],2,0)
         end
-        
         backgrounds=zeros(size(doubles));
         
         set(get(graph,'XLabel'),'String','Wavelength');
@@ -237,19 +241,15 @@ function bulkFret
 
             cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
-        tempBckGrdIDs=[];
+        tempBckGrdIDs=backgroundIDs;
         if size(backgroundIDs,1)>size(cellBackgrounds,1)
             cellBackgrounds(size(backgroundIDs,1),1)=0;
         elseif size(backgroundIDs,1)<size(cellBackgrounds,1)
-            temp
+            tempBckGrdIDs(size(cellBackgrounds,1))=0;
         end
         
-
-        backgroundIDs
-        cellBackgrounds
-        
-        if and(size(cellBackgrounds,1)==1,size(find(backgroundIDs==cellBackgrounds,1),1))
-            set(useBackgrounds,'Value',1+find(backgroundIDs==cellBackgrounds,1))
+        if and(size(cellBackgrounds,1)==1,size(find(tempBckGrdIDs==cellBackgrounds,1),1))
+            set(useBackgrounds,'Value',1+find(tempBckGrdIDs==cellBackgrounds,1))
         else
             set(useBackgrounds,'Value',1);
         end
@@ -321,9 +321,15 @@ function bulkFret
         %normalization done if the boxes are checked.
         [cFile,cPath]=uiputfile({'*.csv';'*.*'},'Export csv');
         data=normalizeAndBackgroundSubtract(doubles,(0:95).',get(normEnable,'Value'),get(backgroundEnable,'Value'));
+        commaHeader = [[{'Wavelength','Temperature'},cellList];repmat({','},1,numel([{'Wavelength','Temperature'},cellList]))];
+        commaHeader = commaHeader(:)';
+        header=cell2mat(commaHeader)
         try
-            csvwrite([cPath,cFile],data);
-        end  
+            fid=fopen([cPath,cFile],'w');
+            fprintf(fid,'%s\n',header);
+            fclose(fid);
+            dlmwrite([cPath,cFile],data,'-append');
+        end
     end
 
     function keyDownCallback(source,event)

@@ -67,40 +67,47 @@ function bulkFret
         %Opens a dialog to select a file, then decodes it into a readable
         %format.
         
-        [file,path]=uigetfile({'*.xls';'*.*'},'File Selector');
-        fid=fopen(strcat(path,file));
-        line = fgetl(fid);
-        lines = [];
-
-        while ischar(line)
-            lines{end+1,1} = line;
+        %[file,path]=uigetfile({'*.xls';'*.csv';'*.*'},'File Selector');
+        [file,path,filter]=uigetfile({'*.xls;*.csv','Spreadsheet files';'*.*','All files'},'File Selector');
+        if file==0
+            return
+        end
+        if file(end-2:end)=='xls'
+            fid=fopen([path,file]);
             line = fgetl(fid);
-        end
-        fclose(fid);
-        cells=[];
+            lines = [];
 
-        for i=7:size(lines,1)-12
-            cLine=strsplit(char(lines(i)));
-            if size(cLine,2)==99
-                cells=[cells;cLine];
+            while ischar(line)
+                lines{end+1,1} = line;
+                line = fgetl(fid);
             end
-        end
+            fclose(fid);
+            cells=[];
 
-        for i=1:size(cells,1)
-            for j=1:size(cells,2)
-                if size(char(cells(i,j)),2)~=1
-                    raw=char(cells(i,j));
-                    striped=[];
-                    for k=1:size(raw,2)
-                        if rem(k,2)==0
-                            striped=[striped,raw(k)];
-                        end
-                    end
-                    doubles(i,j)=str2double(striped);
+            for i=7:size(lines,1)-12
+                cLine=strsplit(char(lines(i)));
+                if size(cLine,2)==99
+                    cells=[cells;cLine];
                 end
             end
+
+            for i=1:size(cells,1)
+                for j=1:size(cells,2)
+                    if size(char(cells(i,j)),2)~=1
+                        raw=char(cells(i,j));
+                        striped=[];
+                        for k=1:size(raw,2)
+                            if rem(k,2)==0
+                                striped=[striped,raw(k)];
+                            end
+                        end
+                        doubles(i,j)=str2double(striped);
+                    end
+                end
+            end
+        else
+            doubles=csvread([path,file],2,0)
         end
-        
         backgrounds=zeros(size(doubles));
         
         set(get(graph,'XLabel'),'String','Wavelength');

@@ -1,5 +1,3 @@
-a={'Alpha','Bravo'};
-b={'Charlie','Delta'};
+string='test';
 
-C=[a,b];
-C
+string(end-2:end)
