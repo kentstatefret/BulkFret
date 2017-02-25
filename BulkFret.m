@@ -106,7 +106,7 @@ function bulkFret
                 end
             end
         else
-            doubles=csvread([path,file],2,0)
+            doubles=csvread([path,file],2,0);
         end
         backgrounds=zeros(size(doubles));
         
@@ -226,7 +226,8 @@ function bulkFret
         drawCells(selectedCells,graph);
     end 
     
-    function CellSelection(source,event) 
+    function CellSelection(source,event)
+
         %called when which cells are selected on the table.
         tempList=event.Indices;
         selectedCells=zeros(size(tempList,1),1);
@@ -244,15 +245,12 @@ function bulkFret
 
             cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
-        tempBckGrdIDs=backgroundIDs;
-        if size(backgroundIDs,1)>size(cellBackgrounds,1)
+        if size(backgroundIDs,1)>0
             cellBackgrounds(size(backgroundIDs,1),1)=0;
-        elseif size(backgroundIDs,1)<size(cellBackgrounds,1)
-            tempBckGrdIDs(size(cellBackgrounds,1))=0;
         end
-        
-        if and(size(cellBackgrounds,1)==1,size(find(tempBckGrdIDs==cellBackgrounds,1),1))
-            set(useBackgrounds,'Value',1+find(tempBckGrdIDs==cellBackgrounds,1))
+
+        if and(size(cellBackgrounds,1)==1,size(find(backgroundIDs==cellBackgrounds,1),1))
+            set(useBackgrounds,'Value',1+find(backgroundIDs==cellBackgrounds,1))
         else
             set(useBackgrounds,'Value',1);
         end
@@ -363,9 +361,6 @@ function bulkFret
                 end
             end
         end
-                    %do a quadratic fit.  y=ax^2+bx+c, therefore,
-                    %y_0=c-b^2/(4a).  Make sure parabola is downward facing
-                    %first
     end
 
     function graphClickCallback(source,event)
