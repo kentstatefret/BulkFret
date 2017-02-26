@@ -318,6 +318,8 @@ function bulkFret
         set(get(graph,'XLabel'),'String','Wavelength');
         set(get(graph,'YLabel'),'String','Intensity');
         set(table,'Enable','on'); %if the table is enabled before a file is open, bad things end up happening.
+        normRanges=zeros(99,2);
+        normalizations=ones(size(doubles,2)+1,2);
     end
 
     function resizeWindow(source,event)
