@@ -214,7 +214,7 @@ function bulkFret
             if sum(Y)~=0
                 hold on
                 if graphStyle(1)
-                    plots(i)=scatter(ax,X,Y,6,cellColors(cells(i)+1,1:end));
+                    plots(i)=scatter(ax,X,Y,300,cellColors(cells(i)+1,1:end),'.');
                 end
                 if graphStyle(2)
                     if graphStyle(3)
