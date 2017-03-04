@@ -86,7 +86,7 @@ function bulkFret
     graph               = axes('Units','Pixels','Position',[400,100,800,600],'Parent',mainWindow,'ButtonDownFcn',@graphClickCallback);
     %Labels the axes
     set(get(graph,'XLabel'),'String','\lambda (nm)');
-    set(get(graph,'YLabel'),'String','Intensity (arbitrary units)');      
+    set(get(graph,'YLabel'),'String','Intensity (arb. units)');      
     set(graph,'FontSize',20)
     
     
@@ -323,9 +323,6 @@ function bulkFret
             doubles=csvread([path,file],1,0);
         end
         backgrounds=zeros(size(doubles));
-        
-        set(get(graph,'XLabel'),'String','Wavelength');
-        set(get(graph,'YLabel'),'String','Intensity');
         set(table,'Enable','on'); %if the table is enabled before a file is open, bad things end up happening.
         normRanges=zeros(99,2);
         normalizations=ones(size(doubles,2)+1,2);

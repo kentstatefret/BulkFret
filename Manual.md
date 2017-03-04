@@ -27,6 +27,7 @@ The software is capable of reopening the .csv files it produces.  However, doing
 ###Exporting a .png image.
 
 To export a .png image, click File-Export Image, then use the resulting dialog to specify where to you wish to save your file and what you wish to name it.  The software will then briefly open a new figure at your monitors native resolution, plot the data to it in the same way it is currently shown in the main window, saves an image of that figure, then closes it again.  Please allow up to a few seconds for this process to complete.
+
 ----
 
 ##View Commands
