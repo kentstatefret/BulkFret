@@ -84,6 +84,11 @@ function bulkFret
     
     %main graph
     graph               = axes('Units','Pixels','Position',[400,100,800,600],'Parent',mainWindow,'ButtonDownFcn',@graphClickCallback);
+    %Labels the axes
+    set(get(graph,'XLabel'),'String','\lambda (nm)');
+    set(get(graph,'YLabel'),'String','Intensity (arbitrary units)');      
+    set(graph,'FontSize',20)
+    
     
     %button to add cellected cells to list of possible backgrounds
     addToBackgrounds	= uicontrol('Style','pushbutton','String','Add selected cells to background list.','Position',[10,500,200,25],'Callback',@addBackgrounds);
@@ -262,14 +267,10 @@ function bulkFret
         
         if size(labels,1)>0
             legend(ax,'show')
-            legend(ax,nonzeros(plots),nonEmpty(labels));
+            legend(ax,nonzeros(plots),nonEmpty(labels),'FontSize',12);
         else
             legend(ax,'off')
         end
-        
-        %Labels the axes
-        set(get(ax,'XLabel'),'String','Wavelength');
-        set(get(ax,'YLabel'),'String','Intensity');
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
