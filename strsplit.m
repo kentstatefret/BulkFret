@@ -1,3 +1,6 @@
+%Needed for legacy support (old version don't have this function built in.
+%Source: https://www.mathworks.com/matlabcentral/fileexchange/21710-string-toolkits/content/strings/strsplit.m
+
 function terms = strsplit(s, delimiter)
 %STRSPLIT Splits a string into multiple terms
 %

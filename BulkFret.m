@@ -435,9 +435,13 @@ function bulkFret
     function exportImage(source,event)
         %exports a PNG of whats being rendered on the graph.
         [iFile,iPath]=uiputfile({'*.png';'*.*'},'Export Image');
-        tempFigure=figure('Position',get( 0, 'Screensize' )); %may not work for multi-monitor
+        screensize=min(get( 0, 'MonitorPositions' ));
+        tempFigure=figure('Position',[1,1,screensize(3:4)]); %may not work for multi-monitor
         tempGraph=axes('Units','Pixels','Parent',tempFigure);
         drawCells(selectedCells,tempGraph);
+        set(get(tempGraph,'XLabel'),'String','\lambda (nm)');
+        set(get(tempGraph,'YLabel'),'String','Intensity (arb. units)');      
+        set(tempGraph,'FontSize',20)
         try
             print(tempFigure,[iPath,iFile],'-dpng');
         end

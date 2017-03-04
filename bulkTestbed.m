@@ -1,3 +1,1 @@
-a=['test';'abcd']
-
-a(1:2,2)
+a=min(get( 0, 'MonitorPositions' ))(3:4)
