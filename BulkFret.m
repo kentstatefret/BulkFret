@@ -94,6 +94,29 @@ function bulkFret
         % cells := The a matrix specifying the cells to process. 
         % n     := Boolean specifying whether to normalize the data.
         % b     := Boolean specifying whether to subtract backgrounds.
+        processedData=input;
+        for i=1:size(cells,1)
+            if n && b
+                for j=1:size(input,1)
+                    for k=1:size(input,2)
+                        bkgrd=input(backgroundIDs(cellBackgrounds(j,k),1),backgroundIDs(cellBackgrounds(j,k),2),:)
+                        processedData(j,k,:)=input(j,k,:)-bkgrd;
+                    end
+                end
+            elseif n
+                for j=1:size(intensities,1)
+                    for k=1:size(intensities,2)
+                        
+                    end
+                end
+            elseif b
+                for j=1:size(intensities,1)
+                    for k=1:size(intensities,2)
+                        
+                    end
+                end
+            end
+        end
         
     end
 
@@ -126,7 +149,6 @@ function bulkFret
         cla(ax)
         for i=1:size(cells,1)    
             Y=permute(intensities(cells(i,1),cells(i,2),1:end),[3,2,1]);
-            cells(i,:)
             color=permute(cellColors(cells(i,2),cells(i,1),:),[3,1,2]);
             if sum(Y)~=0
                 hold on
