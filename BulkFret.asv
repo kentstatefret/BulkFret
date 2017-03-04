@@ -260,6 +260,9 @@ function bulkFret
             set(ax,'Ylim',[yMin-bufferSize,(1+bufferSize)])
         end
         
+        labels
+        nonEmpty(labels)
+        
         if size(labels,1)>0
             legend(ax,'show')
             legend(ax,nonzeros(plots),nonEmpty(labels));
