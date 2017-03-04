@@ -282,11 +282,11 @@ function bulkFret
         %format.
         
         %[file,path]=uigetfile({'*.xls';'*.csv';'*.*'},'File Selector');
-        [file,path,filter]=uigetfile({'*.xls;*.csv','Spreadsheet files';'*.*','All files'},'File Selector');
+        [file,path,filter]=uigetfile({'*.xls;*.csv;*txt','Spreadsheet files'});
         if file==0
             return
         end
-        if file(end-2:end)=='xls'
+        if strcmp(file(end-2:end),'xls') || strcmp(file(end-2:end),'txt')
             fid=fopen([path,file]);
             line = fgetl(fid);
             lines = [];
@@ -319,7 +319,7 @@ function bulkFret
                     end
                 end
             end
-        else
+        elseif strcmp(file(end-2:end),'csv')
             doubles=csvread([path,file],1,0);
         end
         backgrounds=zeros(size(doubles));
