@@ -98,11 +98,11 @@ function bulkFret
     %Labels the axes
     set(get(graph,'XLabel'),'String','\lambda (nm)');
     set(get(graph,'XLabel'),'fontsize',graphFont);
-    set(graph,'XTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont);
+    %set(graph,'XTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont);
     set(get(graph,'YLabel'),'String','Intensity (arb. units)');
     set(get(graph,'YLabel'),'fontsize',graphFont);
-    set(graph,'YTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont);
-    %set(graph,'FontSize',20)
+    %set(graph,'YTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont);
+    set(graph,'FontSize',20)
     
     
     %button to add cellected cells to list of possible backgrounds
@@ -280,11 +280,15 @@ function bulkFret
         %range of the data, but not more.
         bufferSize=0.05;
         set(graph,'Xlim',[min(X),max(X)])
+        %set(graph,'XTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont)
         if yMin<yMax
             set(ax,'Ylim',[yMin-bufferSize*(yMax-yMin),(1+bufferSize)*yMax-bufferSize*yMin])
         else
             set(ax,'Ylim',[yMin-bufferSize,(1+bufferSize)])
         end
+        
+        
+        %set(graph,'YTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont);
         
         if size(labels,1)>0
             legend(ax,'show')
@@ -292,6 +296,7 @@ function bulkFret
         else
             legend(ax,'off')
         end
+
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
