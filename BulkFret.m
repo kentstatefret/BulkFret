@@ -29,6 +29,7 @@ function bulkFret
     availableSymbols={'   ','o','+','*','.','x','s','d','^','v','>','<','p','h'};
     previousSymbolIndex=1;
     graphStyle=[0,1,1]; %stores the style to be used in plotting.  Format is [points,lines,smoothed].
+    graphFont = 20;
     
 
     file=''; % stores the file name to open.
@@ -95,8 +96,12 @@ function bulkFret
     graph               = axes('Units','Pixels','Position',[400,100,800,600],'Parent',mainWindow,'ButtonDownFcn',@graphClickCallback);
     %Labels the axes
     set(get(graph,'XLabel'),'String','\lambda (nm)');
-    set(get(graph,'YLabel'),'String','Intensity (arb. units)');      
-    set(graph,'FontSize',20)
+    set(get(graph,'XLabel'),'fontsize',graphFont);
+    set(graph,'XTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont);
+    set(get(graph,'YLabel'),'String','Intensity (arb. units)');
+    set(get(graph,'YLabel'),'fontsize',graphFont);
+    set(graph,'YTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont);
+    %set(graph,'FontSize',20)
     
     
     %button to add cellected cells to list of possible backgrounds
@@ -116,7 +121,7 @@ function bulkFret
     
     colorEdit           = uicontrol('Style','pushbutton','String','Edit color','Position',[150,375,125,25],'Callback',@changeColor);
     
-    symbolLable     = uicontrol('Style','text','String','Select Symbols for current cells','HorizontalAlignment','left','Position',[10,347,175,15]);
+    symbolLable         = uicontrol('Style','text','String','Select Symbols for current cells','HorizontalAlignment','left','Position',[10,347,175,15]);
     
     symbolEdit          = uicontrol('Style','popupmenu','String',availableSymbols,'Callback',@editSymbol,'Position',[200,340,50,25]);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
