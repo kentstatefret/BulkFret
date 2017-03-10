@@ -24,8 +24,8 @@ function bulkFret
     
     legendLables=cellList;
     cellColors=repmat([0,0,0;0,0,1;0,1,0;0,1,1;1,0,0;1,0,1;1,1,0;1,1,1]/2+ones(8,3)/4,12,1); %Default color scheme.
-    %cellSymbols={'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'}; 
-    cellSymbols={'.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x'};
+    cellSymbols={'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'}; 
+    %cellSymbols={'.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x'};
     availableSymbols={'   ','o','+','*','.','x','s','d','^','v','>','<','p','h'};
     previousSymbolIndex=1;
     graphStyle=[0,1,1]; %stores the style to be used in plotting.  Format is [points,lines,smoothed].
@@ -246,7 +246,11 @@ function bulkFret
                     end
                 end
                 if graphStyle(1)
-                    plots(i)=scatter(ax,X,Y,300,cellColors(cells(i)+1,1:end),cellSymbols{cells(i)+1});
+                    pointSize=60;
+                    if strcmp(cellSymbols{cells(i)+1},'.')
+                        pointSize=300;
+                    end
+                    plots(i)=scatter(ax,X,Y,pointSize,cellColors(cells(i)+1,1:end),cellSymbols{cells(i)+1},'LineWidth',1.5);
                 end
                 hold off
             end
@@ -595,6 +599,7 @@ function bulkFret
 
     function editSymbol(source,event)
         if get(source,'Value')==1
+            graphStyle(1)=0;
             set(source,'Value',previousSymbolIndex)
             return
         end
@@ -603,7 +608,7 @@ function bulkFret
         for i=1:size(selectedCells,1)
             cellSymbols{selectedCells(i)+1}=availableSymbols{symbolIndex};
         end
+        graphStyle(1)=1;
         drawCells(selectedCells,graph);
-        cellSymbols
     end
 end
