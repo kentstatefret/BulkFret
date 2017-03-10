@@ -15,6 +15,7 @@ function bulkFret
     
     doubles=zeros(1,99);      %stores data in a readable format.  May need to change how sizing this is handled in the future.
     backgrounds=[]; %stores the background vectors such that the background for a cell is stored in the same column as the cell.  As initalized, will have no effect
+    constBackgrounds=zeros(1,99);
     normalizations=ones(size(doubles,2)+1,1); %stores the normalization constants such that the appropriate constant is at the same column as the cell data.  As initalized, will have no effect.
     normRanges=zeros(99,2);
 
@@ -109,6 +110,7 @@ function bulkFret
     
     %dropdown to chose background for current cells.
     useBackgrounds      = uicontrol('Style','popupmenu','String',backgroundsStrings,'Callback',@useBackground,'Position',[200,450,50,25]);
+    manualBackground    = uicontrol('Style','edit','Callback',@manualBkgrdEdit,'Position',[275,450,50,25]);
     backgroundLable     = uicontrol('Style','text','String','Select Background for current cells','HorizontalAlignment','left','Position',[10,457,175,15]);
     
     %checkbox to enable subtracting backgrounds
@@ -149,8 +151,8 @@ function bulkFret
         data=input;  %If n and b are both false, we want to return input as is.
         if b %subtracts the backgrounds from the data
             for i=1:size(cells,1)
-                if backgrounds(cells(i)+1)~=0
-                    data(1:end,cells(i)+3)=input(1:end,cells(i)+3)-input(1:end,backgrounds(cells(i)+1)+3);
+                if backgrounds(cells(i)+1)~=0 || constBackgrounds(cells(i)+3)~=0
+                    data(1:end,cells(i)+3)=input(1:end,cells(i)+3)-input(1:end,backgrounds(cells(i)+1)+3)-constBackgrounds(cells(i)+3);
                 end
             end
         end
@@ -253,7 +255,7 @@ function bulkFret
                 if graphStyle(1)
                     pointSize=60;
                     if strcmp(cellSymbols{cells(i)+1},'.')
-                        pointSize=300;
+                        pointSize=500;
                     end
                     plots(i)=scatter(ax,X,Y,pointSize,cellColors(cells(i)+1,1:end),cellSymbols{cells(i)+1},'LineWidth',1.5);
                 end
@@ -614,6 +616,16 @@ function bulkFret
             cellSymbols{selectedCells(i)+1}=availableSymbols{symbolIndex};
         end
         graphStyle(1)=1;
+        drawCells(selectedCells,graph);
+    end
+
+    function manualBkgrdEdit(source,event)
+        if isempty(str2num(get(source,'String')))
+            set(source,'String','0');
+        end
+        for i=1:size(selectedCells,1)
+            constBackgrounds(selectedCells(i)+3)=str2num(get(source,'String'));
+        end
         drawCells(selectedCells,graph);
     end
 end

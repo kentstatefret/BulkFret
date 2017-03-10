@@ -15,6 +15,7 @@ function bulkFret
     
     doubles=zeros(1,99);      %stores data in a readable format.  May need to change how sizing this is handled in the future.
     backgrounds=[]; %stores the background vectors such that the background for a cell is stored in the same column as the cell.  As initalized, will have no effect
+    constBackgrounds=zeros(1,96);
     normalizations=ones(size(doubles,2)+1,1); %stores the normalization constants such that the appropriate constant is at the same column as the cell data.  As initalized, will have no effect.
     normRanges=zeros(99,2);
 
@@ -24,11 +25,12 @@ function bulkFret
     
     legendLables=cellList;
     cellColors=repmat([0,0,0;0,0,1;0,1,0;0,1,1;1,0,0;1,0,1;1,1,0;1,1,1]/2+ones(8,3)/4,12,1); %Default color scheme.
-    %cellSymbols={'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'}; 
-    cellSymbols={'.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x'};
+    cellSymbols={'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'}; 
+    %cellSymbols={'.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x'};
     availableSymbols={'   ','o','+','*','.','x','s','d','^','v','>','<','p','h'};
     previousSymbolIndex=1;
     graphStyle=[0,1,1]; %stores the style to be used in plotting.  Format is [points,lines,smoothed].
+    graphFont = 20;
     
 
     file=''; % stores the file name to open.
@@ -95,8 +97,12 @@ function bulkFret
     graph               = axes('Units','Pixels','Position',[400,100,800,600],'Parent',mainWindow,'ButtonDownFcn',@graphClickCallback);
     %Labels the axes
     set(get(graph,'XLabel'),'String','\lambda (nm)');
-    set(get(graph,'YLabel'),'String','Intensity (arb. units)');      
-    set(graph,'FontSize',20)
+    set(get(graph,'XLabel'),'fontsize',graphFont);
+    set(graph,'XTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont);
+    set(get(graph,'YLabel'),'String','Intensity (arb. units)');
+    set(get(graph,'YLabel'),'fontsize',graphFont);
+    set(graph,'YTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont);
+    %set(graph,'FontSize',20)
     
     
     %button to add cellected cells to list of possible backgrounds
@@ -104,6 +110,7 @@ function bulkFret
     
     %dropdown to chose background for current cells.
     useBackgrounds      = uicontrol('Style','popupmenu','String',backgroundsStrings,'Callback',@useBackground,'Position',[200,450,50,25]);
+    manualBackground    = uicontrol('Style','edit','Callback',@manualBkgrdEdit,'Position',[275,450,50,25]);
     backgroundLable     = uicontrol('Style','text','String','Select Background for current cells','HorizontalAlignment','left','Position',[10,457,175,15]);
     
     %checkbox to enable subtracting backgrounds
@@ -116,7 +123,7 @@ function bulkFret
     
     colorEdit           = uicontrol('Style','pushbutton','String','Edit color','Position',[150,375,125,25],'Callback',@changeColor);
     
-    backgroundLable     = uicontrol('Style','text','String','Select Symbols for current cells','HorizontalAlignment','left','Position',[10,347,175,15]);
+    symbolLable         = uicontrol('Style','text','String','Select Symbols for current cells','HorizontalAlignment','left','Position',[10,347,175,15]);
     
     symbolEdit          = uicontrol('Style','popupmenu','String',availableSymbols,'Callback',@editSymbol,'Position',[200,340,50,25]);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -230,7 +237,7 @@ function bulkFret
         yMin=0;
         yMax=0;
         
-        cla(graph) %wipes the graph before drawing the selected cells
+        cla(ax) %wipes the graph before drawing the selected cells
         
         
         for i=1:size(cells,1)
@@ -246,7 +253,11 @@ function bulkFret
                     end
                 end
                 if graphStyle(1)
-                    plots(i)=scatter(ax,X,Y,300,cellColors(cells(i)+1,1:end),cellSymbols{cells(i)+1});
+                    pointSize=60;
+                    if strcmp(cellSymbols{cells(i)+1},'.')
+                        pointSize=500;
+                    end
+                    plots(i)=scatter(ax,X,Y,pointSize,cellColors(cells(i)+1,1:end),cellSymbols{cells(i)+1},'LineWidth',1.5);
                 end
                 hold off
             end
@@ -359,6 +370,8 @@ function bulkFret
             set(normEnable,'Position',[10,400+delSize(2),125,25]);
             set(captionEdit,'Position',[10,375+delSize(2),125,25]);
             set(colorEdit,'Position',[150,375+delSize(2),125,25]);
+            set(symbolEdit,'Position',[200,340+delSize(2),50,25]);
+            set(symbolLable,'Position',[10,347+delSize(2),175,15]);
         end    
     end
 
@@ -593,12 +606,22 @@ function bulkFret
 
     function editSymbol(source,event)
         if get(source,'Value')==1
+            graphStyle(1)=0;
             set(source,'Value',previousSymbolIndex)
             return
         end
         symbolIndex=get(source,'Value');
         previousSymbolIndex=symbolIndex;
-        for i=1:size(selectedCell,
-        
+        for i=1:size(selectedCells,1)
+            cellSymbols{selectedCells(i)+1}=availableSymbols{symbolIndex};
+        end
+        graphStyle(1)=1;
+        drawCells(selectedCells,graph);
+    end
+
+    function manualBkgrdEdit(source,event)
+        for i=1:size(selectedCells,1)
+            selectedCells(i)+1
+        end
     end
 end
