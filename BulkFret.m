@@ -9,7 +9,7 @@ function bulkFret
     cellTable={'A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12';'B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12';'C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12';'D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12';'E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12';'F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12';'G1','G2','G3','G4','G5','G6','G7','G8','G9','G10','G11','G12';'H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12'};
     %^ stores the cell scrings in the format used by the selector table, a
     %2d array
-    cellList={'A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12','B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12','C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','G1','G2','G3','G4','G5','G6','G7','G8','G9','G10','G11','G12','H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12'}; 
+    cellList={'A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12','B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12','C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','G1','G2','G3','G4','G5','G6','G7','G8','G9','G10','G11','G12','H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12'};
     %^ stores the cell strings in a 1d array.
 
     
@@ -24,6 +24,10 @@ function bulkFret
     
     legendLables=cellList;
     cellColors=repmat([0,0,0;0,0,1;0,1,0;0,1,1;1,0,0;1,0,1;1,1,0;1,1,1]/2+ones(8,3)/4,12,1); %Default color scheme.
+    %cellSymbols={'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'}; 
+    cellSymbols={'.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x','.','o','x'};
+    availableSymbols={'   ','o','+','*','.','x','s','d','^','v','>','<','p','h'};
+    previousSymbolIndex=1;
     graphStyle=[0,1,1]; %stores the style to be used in plotting.  Format is [points,lines,smoothed].
     
 
@@ -112,6 +116,9 @@ function bulkFret
     
     colorEdit           = uicontrol('Style','pushbutton','String','Edit color','Position',[150,375,125,25],'Callback',@changeColor);
     
+    symbolLable     = uicontrol('Style','text','String','Select Symbols for current cells','HorizontalAlignment','left','Position',[10,347,175,15]);
+    
+    symbolEdit          = uicontrol('Style','popupmenu','String',availableSymbols,'Callback',@editSymbol,'Position',[200,340,50,25]);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %       Helper functions     %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -223,17 +230,13 @@ function bulkFret
         yMin=0;
         yMax=0;
         
-        cla(graph) %wipes the graph before drawing the selected cells
+        cla(ax) %wipes the graph before drawing the selected cells
         
         
         for i=1:size(cells,1)
-            
             Y=data(1:end,cells(i)+3);
             if sum(Y)~=0
                 hold on
-                if graphStyle(1)
-                    plots(i)=scatter(ax,X,Y,300,cellColors(cells(i)+1,1:end),'.');
-                end
                 if graphStyle(2)
                     if graphStyle(3)
                         Yi=pchip(X,Y,Xi); %creates smoothed version of the Y data
@@ -242,7 +245,9 @@ function bulkFret
                         plots(i)=plot(ax,X,Y,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
                     end
                 end
-
+                if graphStyle(1)
+                    plots(i)=scatter(ax,X,Y,300,cellColors(cells(i)+1,1:end),cellSymbols{cells(i)+1});
+                end
                 hold off
             end
             if sum(data(1:end,cells(i)+3))~=0
@@ -354,6 +359,8 @@ function bulkFret
             set(normEnable,'Position',[10,400+delSize(2),125,25]);
             set(captionEdit,'Position',[10,375+delSize(2),125,25]);
             set(colorEdit,'Position',[150,375+delSize(2),125,25]);
+            set(symbolEdit,'Position',[200,340+delSize(2),50,25]);
+            set(symbolLable,'Position',[10,347+delSize(2),175,15]);
         end    
     end
 
@@ -369,6 +376,7 @@ function bulkFret
         selectedCells=zeros(size(tempList,1),1);
         
         cellBackgrounds=[];
+        selectedSymbols={};
         for i=1:size(selectedCells,1)
             selectedCells(i)=12*(tempList(i,1)-1)+(tempList(i,2)-1); % actually builds up selectedCells, arguably the main job of this function
             %The rest of this loop and the next if statement are dedicated
@@ -378,7 +386,8 @@ function bulkFret
             catch
                 backgroundID=0;
             end
-
+            selectedSymbols{size(selectedSymbols,2)+1}=cellSymbols{selectedCells(i)+1};
+            selectedSymbols=unique(selectedSymbols);
             cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
         if size(cellBackgrounds,1)==1 && size(find(backgroundIDs==cellBackgrounds,1),1)
@@ -386,6 +395,13 @@ function bulkFret
         else
             set(useBackgrounds,'Value',1);
         end
+        
+        if size(selectedSymbols,2)==1
+            set(symbolEdit,'Value',find(not(cellfun('isempty',strfind(availableSymbols,selectedSymbols{1})))));
+        else
+            set(symbolEdit,'Value',1);
+        end
+        
         drawCells(selectedCells,graph);  %Need to update which cells are actually drawn after the cells are selected
     end
 
@@ -577,4 +593,17 @@ function bulkFret
         set(zoomOutButton,'State','off')
     end
 
+    function editSymbol(source,event)
+        if get(source,'Value')==1
+            set(source,'Value',previousSymbolIndex)
+            return
+        end
+        symbolIndex=get(source,'Value');
+        previousSymbolIndex=symbolIndex;
+        for i=1:size(selectedCells,1)
+            cellSymbols{selectedCells(i)+1}=availableSymbols{symbolIndex};
+        end
+        drawCells(selectedCells,graph);
+        cellSymbols
+    end
 end

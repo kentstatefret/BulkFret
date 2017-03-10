@@ -1,1 +1,3 @@
-a=min(get( 0, 'MonitorPositions' ))(3:4)
+a={'test','test','foo','bar'};
+a{size(a,2)+1}='abc';
+a
