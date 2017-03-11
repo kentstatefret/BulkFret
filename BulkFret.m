@@ -223,6 +223,10 @@ function bulkFret
         % ax    := the axes to draw too.
         
         
+        if size(cells,1)==0 || size(cells,2)==0
+            return
+        end
+        
         data=normalizeAndBackgroundSubtract(doubles,cells,get(normEnable,'Value'),get(backgroundEnable,'Value'));
         
         X=data(1:end,1); %the wavelengths are stored in the first column
