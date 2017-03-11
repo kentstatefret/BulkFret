@@ -137,7 +137,6 @@ function bulkFret
     end
     
     function data=normalizeAndBackgroundSubtract(input,cells,n,b)
-        
         % Returns a version of input with the backgrounds subtracted and
         % normalization applies, as specified by n and b.
         %
@@ -167,14 +166,14 @@ function bulkFret
         end
     end
 
-    function norms=getNormalizationValues(data,bckgrnd)
+    function norms=getNormalizationValues(data)
         
         % Returns a 96x2 matrix of positive normalization scalers, to be
         % used for later processing.
         %
         % data    := the raw data to use.
         % bckgrnd := the backgrounds to subtract.
-        
+        backgroundSubtracted=normalizeAndBackgroundSubtract(data,0:95,0,1);
         norms=ones(size(data,1),2); %A normalization value of one has no effect, so if that's the default value
         for i=3:99
             j=normRanges(i,1); % normRange specifies which wavelengths to use in normalizations
@@ -199,7 +198,7 @@ function bulkFret
                 
                 %repeats following lines, but for the background subtracted
                 %version of the data.
-                fit=polyfit(data(j:k,1),data(j:k,i)-bckgrnd(j:k,i),2);
+                fit=polyfit(data(j:k,1),backgroundSubtracted(j:k,i),2);
                 a=fit(1);
                 b=fit(2);
                 c=fit(3);
@@ -407,11 +406,10 @@ function bulkFret
             cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
         constBkgrd=unique(constBkgrd);
-        
         if size(constBkgrd,2)==1
-            set(manualBackground,'String',
+            set(manualBackground,'String',num2str(constBkgrd(1)));
         else
-        
+            set(manualBackground,'String',' ');
         end
         
         if size(cellBackgrounds,1)==1 && size(find(backgroundIDs==cellBackgrounds,1),1)

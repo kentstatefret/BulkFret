@@ -137,7 +137,6 @@ function bulkFret
     end
     
     function data=normalizeAndBackgroundSubtract(input,cells,n,b)
-        
         % Returns a version of input with the backgrounds subtracted and
         % normalization applies, as specified by n and b.
         %
@@ -167,14 +166,14 @@ function bulkFret
         end
     end
 
-    function norms=getNormalizationValues(data,bckgrnd)
+    function norms=getNormalizationValues(data)
         
         % Returns a 96x2 matrix of positive normalization scalers, to be
         % used for later processing.
         %
         % data    := the raw data to use.
         % bckgrnd := the backgrounds to subtract.
-        
+        backgroundSubtracted=normalizeAndBackgroundSubtract(data,0:95,0,1);
         norms=ones(size(data,1),2); %A normalization value of one has no effect, so if that's the default value
         for i=3:99
             j=normRanges(i,1); % normRange specifies which wavelengths to use in normalizations
@@ -199,10 +198,10 @@ function bulkFret
                 
                 %repeats following lines, but for the background subtracted
                 %version of the data.
-                fit=polyfit(data(j:k,1),data(j:k,i)-bckgrnd(j:k,i),2);
+                fit=polyfit(backgroundSubtracted(j:k,1),backgroundSubtracted(j:k,i),2);
                 a=fit(1);
                 b=fit(2);
-                c=fit(3);
+                c=fit(3)-constBackgrounds(i);
                 if (a<0 && c-b*b/(4*a)>0)
                     if xMin>-b/(2*a)
                         norms(i,1)=a*xMin*xMin+b*xMin+c;
@@ -456,7 +455,7 @@ function bulkFret
             backgrounds(selectedCells(i)+1)=backgroundID;
         end
         drawCells(selectedCells,graph)
-        normalizations=getNormalizationValues(doubles,backgrounds);
+        normalizations=getNormalizationValues(doubles);
     end
     
     function captionEdited(source,event)
@@ -523,7 +522,7 @@ function bulkFret
             normRanges(selectedCells(i)+3,1)=index1;
             normRanges(selectedCells(i)+3,2)=index2;
         end
-        normalizations=getNormalizationValues(doubles,backgrounds);
+        normalizations=getNormalizationValues(doubles);
         drawCells(selectedCells,graph);
     end
 
@@ -638,6 +637,7 @@ function bulkFret
         for i=1:size(selectedCells,1)
             constBackgrounds(selectedCells(i)+3)=str2num(get(source,'String'));
         end
+        normalizations=getNormalizationValues(doubles);
         drawCells(selectedCells,graph);
     end
 end
