@@ -379,6 +379,7 @@ function bulkFret
             set(graph,'Position',[[400,100],[800,600]+delSize]);
             set(addToBackgrounds,'Position',[10,500+delSize(2),200,25]);
             set(useBackgrounds,'Position',[200,450+delSize(2),50,25]);
+            set(manualBackground,'Position',[275,450+delSize(2),50,25])
             set(backgroundLable,'Position',[10,457+delSize(2),175,15]);
             set(backgroundEnable,'Position',[10,425+delSize(2),150,25]);
             set(normEnable,'Position',[10,400+delSize(2),125,25]);
