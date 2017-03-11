@@ -95,12 +95,6 @@ function bulkFret
     
     %main graph
     graph               = axes('Units','Pixels','Position',[400,100,800,600],'Parent',mainWindow,'ButtonDownFcn',@graphClickCallback);
-    %Labels the axes
-    set(get(graph,'XLabel'),'String','\lambda (nm)');
-    set(get(graph,'XLabel'),'fontsize',graphFont);
-    set(get(graph,'YLabel'),'String','Intensity (arb. units)');
-    set(get(graph,'YLabel'),'fontsize',graphFont);
-    set(graph,'FontSize',20)
     
     
     %button to add cellected cells to list of possible backgrounds
@@ -129,6 +123,12 @@ function bulkFret
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     function out=nonEmpty(in)
+        
+        % Returns only the non-empty cells in a cell array.
+        %
+        % in  := the input cell array.
+        % out := the output (non-empty cells only) cell array.
+        
         indicies=find(~cellfun(@isempty,in));
         out=cell(size(indicies));
         for i=1:size(indicies,2)
@@ -215,7 +215,7 @@ function bulkFret
         end
     end
 
-    function drawCells(cells,ax)
+    function drawCells(cells,ax,font)
         
         % Draws specified cells to a specified axes.
         % 
@@ -244,9 +244,9 @@ function bulkFret
                 if graphStyle(2)
                     if graphStyle(3)
                         Yi=pchip(X,Y,Xi); %creates smoothed version of the Y data
-                        plots(i)=plot(ax,Xi,Yi,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
+                        plots(i)=plot(ax,Xi,Yi,'LineWidth',1.5*(font/20),'Color',cellColors(cells(i)+1,1:end));
                     else
-                        plots(i)=plot(ax,X,Y,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
+                        plots(i)=plot(ax,X,Y,'LineWidth',1.5*(font/20),'Color',cellColors(cells(i)+1,1:end));
                     end
                 end
                 if graphStyle(1)
@@ -254,7 +254,8 @@ function bulkFret
                     if strcmp(cellSymbols{cells(i)+1},'.')
                         pointSize=500;
                     end
-                    plots(i)=scatter(ax,X,Y,pointSize,cellColors(cells(i)+1,1:end),cellSymbols{cells(i)+1},'LineWidth',1.5);
+                    pointSize=pointSize*(font/20);
+                    plots(i)=scatter(ax,X,Y,pointSize,cellColors(cells(i)+1,1:end),cellSymbols{cells(i)+1},'LineWidth',1.5*(font/20));
                 end
                 hold off
             end
@@ -289,10 +290,17 @@ function bulkFret
         
         if size(labels,1)>0
             legend(ax,'show')
-            legend(ax,nonzeros(plots),nonEmpty(labels),'FontSize',12);
+            legend(ax,nonzeros(plots),nonEmpty(labels),'FontSize',font*0.6);
         else
             legend(ax,'off')
         end
+        
+        %Labels the axes
+        set(get(ax,'XLabel'),'String','\lambda (nm)');
+        set(get(ax,'XLabel'),'fontsize',font);
+        set(get(ax,'YLabel'),'String','Intensity (arb. units)');
+        set(get(ax,'YLabel'),'fontsize',font);
+        set(ax,'FontSize',font)
 
     end
 
@@ -424,7 +432,7 @@ function bulkFret
             set(symbolEdit,'Value',1);
         end
         
-        drawCells(selectedCells,graph);  %Need to update which cells are actually drawn after the cells are selected
+        drawCells(selectedCells,graph,graphFont);  %Need to update which cells are actually drawn after the cells are selected
     end
 
     function addBackgrounds(source,event)
@@ -478,18 +486,18 @@ function bulkFret
     function exportImage(source,event)
         %exports a PNG of whats being rendered on the graph.
         [iFile,iPath]=uiputfile({'*.png';'*.*'},'Export Image');
-        screensize=min(get( 0, 'MonitorPositions' ));
-        tempFigure=figure('Position',[1,1,screensize(3:4)]); %may not work for multi-monitor
-        tempGraph=axes('Units','Pixels','Parent',tempFigure);
-        drawCells(selectedCells,tempGraph);
-        set(get(tempGraph,'XLabel'),'String','\lambda (nm)');
-        set(get(tempGraph,'YLabel'),'String','Intensity (arb. units)');      
-        set(tempGraph,'FontSize',20)
-        try
-            print(tempFigure,[iPath,iFile],'-dpng');
+        if size(iFile,2)==1 || size(iPath,2)==1
+            return
         end
-        close(tempFigure);
-        drawCells(selectedCells,graph);
+        tempFig   = figure('position',[25,25,960,540]);
+        tempGraph = axes(tempFig);
+        set(get(tempGraph,'XLabel'),'String','\lambda (nm)');
+        set(get(tempGraph,'YLabel'),'String','Intensity (arb. units)');
+        set(tempGraph,'FontSize',10)
+        drawCells(selectedCells,tempGraph,graphFont/2);
+        img=print(tempFig,'-RGBImage','-r384');
+        imwrite(img,[iPath,iFile]);
+        close(tempFig);
     end
     
     function exportCSV(source,event)
@@ -523,7 +531,7 @@ function bulkFret
             normRanges(selectedCells(i)+3,2)=index2;
         end
         normalizations=getNormalizationValues(doubles);
-        drawCells(selectedCells,graph);
+        drawCells(selectedCells,graph,20);
     end
 
     function drawScatterCallback(source,event)
@@ -540,7 +548,7 @@ function bulkFret
             graphStyle(1)=1;
             set(drawScatter,'Checked','on')
         end
-        drawCells(selectedCells,graph); %Updates the graph
+        drawCells(selectedCells,graph,20); %Updates the graph
     end
 
     function drawLinesCallback(source,event)
@@ -556,7 +564,7 @@ function bulkFret
             graphStyle(2)=1;
             set(drawLines,'Checked','on')
         end
-        drawCells(selectedCells,graph); %Updates the graph
+        drawCells(selectedCells,graph,20); %Updates the graph
     end
 
     function smoothLinesCallback(source,event)
@@ -568,7 +576,7 @@ function bulkFret
             graphStyle(3)=1;
             set(smoothLines,'Checked','on')
         end
-        drawCells(selectedCells,graph);  
+        drawCells(selectedCells,graph,20);  
     end
 
     function zoomCallback(source,event)
@@ -602,6 +610,10 @@ function bulkFret
     end
 
     function panCallback(source,event)
+        
+        %Allows the user to enter pan mode.  Tries to duplicate the
+        %functionality of the pan button on the default matlab figure.
+        
         toggle   = strcmp(get(source,'State'),'on');
         if toggle
             pan on
@@ -616,6 +628,10 @@ function bulkFret
     end
 
     function editSymbol(source,event)
+        
+        %Changes the symbol used to represent the data points in the
+        %scatter view.
+        
         if get(source,'Value')==1
             graphStyle(1)=0;
             set(source,'Value',previousSymbolIndex)
@@ -627,17 +643,21 @@ function bulkFret
             cellSymbols{selectedCells(i)+1}=availableSymbols{symbolIndex};
         end
         graphStyle(1)=1;
-        drawCells(selectedCells,graph);
+        drawCells(selectedCells,graph,20);
     end
 
     function manualBkgrdEdit(source,event)
+        
+        %Allows the user to manually edit the constant background.  No data
+        %sanitization except for confirming it's a number.
+        
         if isempty(str2num(get(source,'String')))
             set(source,'String','0');
         end
         for i=1:size(selectedCells,1)
-            constBackgrounds(selectedCells(i)+3)=str2num(get(source,'String'));
+            constBackgrounds(selectedCells(i)+3)=str2double(get(source,'String'));
         end
         normalizations=getNormalizationValues(doubles);
-        drawCells(selectedCells,graph);
+        drawCells(selectedCells,graph,20);
     end
 end
