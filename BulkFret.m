@@ -39,7 +39,7 @@ function bulkFret
     %Set up the UI
     
     %main window
-    mainWindow          = figure('Name','Bulk Fret','NumberTitle','off','Visible','on','Position',[25,25,1280,720],'ResizeFcn',@resizeWindow,'KeyPressFcn',@keyDownCallback);
+    mainWindow          = figure('Name','Bulk Fret','NumberTitle','off','Visible','on','Position',[25,25,1280,720],'ResizeFcn',@resizeWindow);
     
     %Gets some of the icons used in the default toolbar.
     openImg             = get(findall(mainWindow,'ToolTipString','Open File'),'CData');
@@ -98,10 +98,8 @@ function bulkFret
     %Labels the axes
     set(get(graph,'XLabel'),'String','\lambda (nm)');
     set(get(graph,'XLabel'),'fontsize',graphFont);
-    %set(graph,'XTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont);
     set(get(graph,'YLabel'),'String','Intensity (arb. units)');
     set(get(graph,'YLabel'),'fontsize',graphFont);
-    %set(graph,'YTickLabel',get(graph,'XTickLabel'),'fontsize',graphFont);
     set(graph,'FontSize',20)
     
     
@@ -393,6 +391,7 @@ function bulkFret
         
         cellBackgrounds=[];
         selectedSymbols={};
+        constBkgrd=[];
         for i=1:size(selectedCells,1)
             selectedCells(i)=12*(tempList(i,1)-1)+(tempList(i,2)-1); % actually builds up selectedCells, arguably the main job of this function
             %The rest of this loop and the next if statement are dedicated
@@ -402,10 +401,18 @@ function bulkFret
             catch
                 backgroundID=0;
             end
+            constBkgrd(i)=constBackgrounds(selectedCells(i)+3);
             selectedSymbols{size(selectedSymbols,2)+1}=cellSymbols{selectedCells(i)+1};
             selectedSymbols=unique(selectedSymbols);
             cellBackgrounds=unique([cellBackgrounds;backgroundID]);
         end
+        constBkgrd=unique(constBkgrd);
+        if size(constBkgrd,2)==1
+            set(manualBackground,'String',num2str(constBkgrd(1)));
+        else
+            set(manualBackground,'String',' ');
+        end
+        
         if size(cellBackgrounds,1)==1 && size(find(backgroundIDs==cellBackgrounds,1),1)
             set(useBackgrounds,'Value',1+find(backgroundIDs==cellBackgrounds,1))
         else
