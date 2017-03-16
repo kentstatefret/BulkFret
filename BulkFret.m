@@ -490,18 +490,17 @@ function bulkFret
     
     function exportImage(source,event)
         %exports a PNG of whats being rendered on the graph.
-        [iFile,iPath]=uiputfile({'*.png';'*.*'},'Export Image');
+        [iFile,iPath]=uiputfile({'*.png'},'Export Image');
         if size(iFile,2)==1 || size(iPath,2)==1
             return
         end
         tempFig   = figure('position',[25,25,960,540]);
-        tempGraph = axes(tempFig);
+        tempGraph = axes('Units','Pixels','Parent',tempFig);
         set(get(tempGraph,'XLabel'),'String','\lambda (nm)');
         set(get(tempGraph,'YLabel'),'String','Intensity (arb. units)');
         set(tempGraph,'FontSize',10)
         drawCells(selectedCells,tempGraph,graphFont/2);
-        img=print(tempFig,'-RGBImage','-r384');
-        imwrite(img,[iPath,iFile]);
+        print(tempFig,[iPath,iFile(1:end-4)],'-dpng','-r384');
         close(tempFig);
     end
     
