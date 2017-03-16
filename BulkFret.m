@@ -392,7 +392,7 @@ function bulkFret
 
     function drawCellsCallback(source,event)
         %needed because I can't call drawCells directly from the checkbox.
-        drawCells(selectedCells,graph);
+        drawCells(selectedCells,graph,graphFont);
     end 
     
     function CellSelection(source,event)
@@ -467,7 +467,7 @@ function bulkFret
         for i=1:size(selectedCells,1)
             backgrounds(selectedCells(i)+1)=backgroundID;
         end
-        drawCells(selectedCells,graph)
+        drawCells(selectedCells,graph,graphFont)
         normalizations=getNormalizationValues(doubles);
     end
     
@@ -476,7 +476,7 @@ function bulkFret
         for i=1:size(selectedCells,1)
             legendLables{selectedCells(i)+1}=get(source,'String');
         end
-        drawCells(selectedCells,graph)
+        drawCells(selectedCells,graph,graphFont)
     end
     
     function changeColor(source,event)
@@ -485,7 +485,7 @@ function bulkFret
         for i=1:size(selectedCells,1)
             cellColors(selectedCells(i)+1,1:end)=color;
         end
-        drawCells(selectedCells,graph)
+        drawCells(selectedCells,graph,graphFont)
     end
     
     function exportImage(source,event)
@@ -535,7 +535,7 @@ function bulkFret
             normRanges(selectedCells(i)+3,2)=index2;
         end
         normalizations=getNormalizationValues(doubles);
-        drawCells(selectedCells,graph,20);
+        drawCells(selectedCells,graph,graphFont);
     end
 
     function drawScatterCallback(source,event)
@@ -552,7 +552,7 @@ function bulkFret
             graphStyle(1)=1;
             set(drawScatter,'Checked','on')
         end
-        drawCells(selectedCells,graph,20); %Updates the graph
+        drawCells(selectedCells,graph,graphFont); %Updates the graph
     end
 
     function drawLinesCallback(source,event)
@@ -568,7 +568,7 @@ function bulkFret
             graphStyle(2)=1;
             set(drawLines,'Checked','on')
         end
-        drawCells(selectedCells,graph,20); %Updates the graph
+        drawCells(selectedCells,graph,graphFont); %Updates the graph
     end
 
     function smoothLinesCallback(source,event)
@@ -580,7 +580,7 @@ function bulkFret
             graphStyle(3)=1;
             set(smoothLines,'Checked','on')
         end
-        drawCells(selectedCells,graph,20);  
+        drawCells(selectedCells,graph,graphFont);  
     end
 
     function zoomCallback(source,event)
@@ -647,7 +647,7 @@ function bulkFret
             cellSymbols{selectedCells(i)+1}=availableSymbols{symbolIndex};
         end
         graphStyle(1)=1;
-        drawCells(selectedCells,graph,20);
+        drawCells(selectedCells,graph,graphFont);
     end
 
     function manualBkgrdEdit(source,event)
@@ -662,6 +662,6 @@ function bulkFret
             constBackgrounds(selectedCells(i)+3)=str2double(get(source,'String'));
         end
         normalizations=getNormalizationValues(doubles);
-        drawCells(selectedCells,graph,20);
+        drawCells(selectedCells,graph,graphFont);
     end
 end

@@ -223,6 +223,10 @@ function bulkFret
         % ax    := the axes to draw too.
         
         
+        if size(cells,1)==0 || size(cells,2)==0
+            return
+        end
+        
         data=normalizeAndBackgroundSubtract(doubles,cells,get(normEnable,'Value'),get(backgroundEnable,'Value'));
         
         X=data(1:end,1); %the wavelengths are stored in the first column
@@ -241,12 +245,15 @@ function bulkFret
             Y=data(1:end,cells(i)+3);
             if sum(Y)~=0
                 hold on
+                Xi
+                Yi
+                cellColors(cells(i)+1,1:end)
                 if graphStyle(2)
                     if graphStyle(3)
                         Yi=pchip(X,Y,Xi); %creates smoothed version of the Y data
                         plots(i)=plot(ax,Xi,Yi,'LineWidth',1.5*(font/20),'Color',cellColors(cells(i)+1,1:end));
                     else
-                        plots(i)=plot(ax,X,Y,'LineWidth',1.5,'Color',cellColors(cells(i)+1,1:end));
+                        plots(i)=plot(ax,X,Y,'LineWidth',1.5*(font/20),'Color',cellColors(cells(i)+1,1:end));
                     end
                 end
                 if graphStyle(1)
@@ -375,6 +382,7 @@ function bulkFret
             set(graph,'Position',[[400,100],[800,600]+delSize]);
             set(addToBackgrounds,'Position',[10,500+delSize(2),200,25]);
             set(useBackgrounds,'Position',[200,450+delSize(2),50,25]);
+            set(manualBackground,'Position',[275,450+delSize(2),50,25])
             set(backgroundLable,'Position',[10,457+delSize(2),175,15]);
             set(backgroundEnable,'Position',[10,425+delSize(2),150,25]);
             set(normEnable,'Position',[10,400+delSize(2),125,25]);
@@ -485,18 +493,18 @@ function bulkFret
     
     function exportImage(source,event)
         %exports a PNG of whats being rendered on the graph.
-        [iFile,iPath]=uiputfile({'*.png';'*.*'},'Export Image');
-        size(iFile)
-        size(iPath)
+        [iFile,iPath]=uiputfile({'*.png'},'Export Image');
         if size(iFile,2)==1 || size(iPath,2)==1
             return
         end
-        tempfig   = figure('position',[25,25,960,540]);
-        tempGraph = axes(tempfig);
+        tempFig   = figure('position',[25,25,960,540]);
+        tempGraph = axes('Units','Pixels','Parent',tempFig);
         set(get(tempGraph,'XLabel'),'String','\lambda (nm)');
         set(get(tempGraph,'YLabel'),'String','Intensity (arb. units)');
         set(tempGraph,'FontSize',10)
         drawCells(selectedCells,tempGraph,graphFont/2);
+        print(tempFig,[iPath,iFile(1:end-4)],'-dpng','-r384');
+        close(tempFig);
     end
     
     function exportCSV(source,event)
